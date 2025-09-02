@@ -47,4 +47,4 @@ npx expo start
 
 #### Expo Go Screenshot
 
-![homework-1-screenshot](assets/images/homework-1.jpg)
+<img src="assets/images/homework-1.jpg" alt="homework-1-screenshot" width="400px">
