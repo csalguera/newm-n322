@@ -1,6 +1,6 @@
 ## Homework 1
 
-#### Assignment Instructions
+### Assignment Instructions
 
 1. Install Node.js
     - Node.js: https://nodejs.org
@@ -24,7 +24,7 @@ npx expo start
 
 5. Change the background color of the main view.
 
-#### Set Up Instructions
+### Set Up Instructions
 
 1. Clone repository
 
@@ -45,6 +45,6 @@ npm install
 npx expo start
 ```
 
-#### Expo Go Screenshot
+### Expo Go Screenshot
 
 <img src="assets/images/homework-1.jpg" alt="homework-1-screenshot" width="400px">
