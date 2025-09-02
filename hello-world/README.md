@@ -1,6 +1,6 @@
 ## Homework 1
 
-#### Instructions
+#### Assignment Instructions
 
 1. Install Node.js
     - Node.js: https://nodejs.org
@@ -23,3 +23,24 @@ npx expo start
 4. Replace the default text with your own custom message.
 
 5. Change the background color of the main view.
+
+#### Set Up Instructions
+
+1. Clone repository
+
+```
+git clone https://github.com/csalguera/newm-n322
+cd newm-n322/hello-world
+```
+
+2. Install dependencies
+
+```
+npm install
+```
+
+3. Start the development server
+
+```
+npx expo start
+```
