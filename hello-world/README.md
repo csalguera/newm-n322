@@ -44,3 +44,7 @@ npm install
 ```
 npx expo start
 ```
+
+#### Expo Go Screenshot
+
+![homework-1-screenshot](assets/images/homework-1.jpg)
