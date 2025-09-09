@@ -18,7 +18,7 @@ export default function App() {
           {loading &&
             <ActivityIndicator
               size="large"
-              color="#0000ff"
+              color="#bacfffff"
               style={styles.loader}
             />
           }
