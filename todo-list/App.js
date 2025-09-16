@@ -7,7 +7,10 @@ import {
   TextInput,
   Button,
   FlatList,
+  Pressable,
 } from "react-native";
+
+import { Feather } from "@expo/vector-icons"
 
 export default function App() {
   const [todo, setTodo] = useState("")
@@ -17,6 +20,10 @@ export default function App() {
     if (todo.trim().length === 0) return;
     setList([...list, { id: Date.now().toString(), name: todo }]);
     setTodo("");
+  };
+
+  const removeTodo = (id) => {
+    setList(list.filter((g) => g.id !== id));
   };
 
   return (
@@ -37,6 +44,16 @@ export default function App() {
         renderItem={({ item: todo }) => (
           <View style={styles.todoRow}>
             <Text style={styles.todoText}>{todo.name}</Text>
+            <View style={{ flexDirection: "row" }}>
+              <Pressable onPress={() => removeTodo(todo.id)}>
+                <Feather
+                  name="trash-2"
+                  size={22}
+                  color="red"
+                  style={styles.deleteBtn}
+                />
+              </Pressable>
+            </View>
           </View>
         )}
       />
@@ -83,5 +100,9 @@ const styles = StyleSheet.create({
   },
   todoText: {
     fontSize: 16,
+  },
+  deleteBtn: {
+    fontSize: 18,
+    color: "red",
   },
 });
