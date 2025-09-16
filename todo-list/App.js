@@ -15,6 +15,8 @@ import { Feather } from "@expo/vector-icons"
 export default function App() {
   const [todo, setTodo] = useState("")
   const [list, setList] = useState([])
+  const [todoId, setTodoId] = useState(null)
+  const [todoName, setTodoName] = useState("")
 
   const addTodo = () => {
     if (todo.trim().length === 0) return;
@@ -25,6 +27,17 @@ export default function App() {
   const removeTodo = (id) => {
     setList(list.filter((g) => g.id !== id));
   };
+
+  const editTodo = (id, name) => {
+    setTodoId(id)
+    setTodoName(name)
+  }
+
+  const saveTodo = (id) => {
+    setList(list.map((g) => (g.id === id ? { ...g, name: todoName } : g)))
+    setTodoId(null)
+    setTodoName("")
+  }
 
   return (
     <View style={styles.container}>
@@ -43,8 +56,36 @@ export default function App() {
         keyExtractor={(g) => g.id}
         renderItem={({ item: todo }) => (
           <View style={styles.todoRow}>
-            <Text style={styles.todoText}>{todo.name}</Text>
+            {todoId === todo.id ? (
+              <TextInput
+                style={styles.input}
+                value={todoName}
+                onChangeText={setTodoName}
+                autoFocus
+              />
+            ) : (
+              <Text style={styles.todoText}>{todo.name}</Text>
+            )}
             <View style={{ flexDirection: "row" }}>
+              {todoId === todo.id ? (
+                <Pressable onPress={() => saveTodo(todo.id)}>
+                  <Feather
+                    name="save"
+                    size={22}
+                    color="green"
+                    style={styles.saveBtn}
+                  />
+                </Pressable>
+              ) : (
+                <Pressable onPress={() => editTodo(todo.id, todo.name)}>
+                  <Feather
+                    name="edit"
+                    size={22}
+                    color="blue"
+                    style={styles.editBtn}
+                  />
+                </Pressable>
+              )}
               <Pressable onPress={() => removeTodo(todo.id)}>
                 <Feather
                   name="trash-2"
@@ -104,5 +145,15 @@ const styles = StyleSheet.create({
   deleteBtn: {
     fontSize: 18,
     color: "red",
+  },
+  editBtn: {
+    marginRight: 20,
+    fontSize: 18,
+    color: "blue",
+  },
+  saveBtn: {
+    marginRight: 20,
+    fontSize: 18,
+    color: "green",
   },
 });
