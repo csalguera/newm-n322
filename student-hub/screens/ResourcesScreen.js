@@ -1,11 +1,25 @@
 // modules
-import { View, Text, StyleSheet } from "react-native";
+import { View, Text, StyleSheet, Button } from "react-native";
+import { useNavigation } from "@react-navigation/native";
 
 const ResourcesScreen = () => {
+  const navigation = useNavigation();
+
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Resources Screen</Text>
       <Text>This is the Resources Screen.</Text>
+      <Button
+        title="View Student Details"
+        onPress={() =>
+          navigation.navigate("Details", {
+            fName: "Carlos",
+            lName: "Salguera",
+            age: 29,
+            major: "Computer Science",
+          })
+        }
+      />
     </View>
   );
 };
