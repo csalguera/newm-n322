@@ -2,7 +2,7 @@
 import { NavigationContainer } from "@react-navigation/native";
 
 // components
-import Tabs from "./components/Tabs";
+import Tabs from "./navigation/Tabs";
 
 const App = () => {
   return (
