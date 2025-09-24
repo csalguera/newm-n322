@@ -1,13 +1,15 @@
 // modules
-import { NavigationContainer } from '@react-navigation/native';
+import { NavigationContainer } from "@react-navigation/native";
 
 // components
-import Tabs from './components/Tabs';
+import Tabs from "./components/Tabs";
 
-export default function App() {
+const App = () => {
   return (
     <NavigationContainer>
       <Tabs />
     </NavigationContainer>
   );
-}
+};
+
+export default App;

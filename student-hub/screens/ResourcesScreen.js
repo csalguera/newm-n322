@@ -1,11 +1,11 @@
 // modules
 import { View, Text, StyleSheet } from "react-native";
 
-const HomeScreen = () => {
+const ResourcesScreen = () => {
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Home Screen</Text>
-      <Text>This is the Home Screen.</Text>
+      <Text style={styles.title}>Resources Screen</Text>
+      <Text>This is the Resources Screen.</Text>
     </View>
   );
 };
@@ -22,4 +22,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default HomeScreen;
+export default ResourcesScreen;
