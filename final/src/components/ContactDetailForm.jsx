@@ -8,7 +8,7 @@ import {
 } from "react-native";
 import Avatar from "./Avatar";
 
-export default function ContactForm({
+export default function ContactDetailForm({
   firstName,
   lastName,
   contactNumber,
@@ -18,8 +18,9 @@ export default function ContactForm({
   onNumberChange,
   onPickImage,
   onRemoveImage,
-  onSubmit,
-  submitLabel = "Add Contact",
+  onSave,
+  onDelete,
+  onCancel,
 }) {
   return (
     <View style={styles.formCard}>
@@ -42,32 +43,49 @@ export default function ContactForm({
       </View>
 
       <View style={styles.row}>
-        <TextInput
-          style={[styles.input, { flex: 1 }]}
-          placeholder="first name"
-          value={firstName}
-          onChangeText={onFirstNameChange}
-          autoCapitalize="words"
-        />
-        <TextInput
-          style={[styles.input, { flex: 1 }]}
-          placeholder="last name"
-          value={lastName}
-          onChangeText={onLastNameChange}
-          autoCapitalize="words"
-        />
+        <View style={{ flex: 1 }}>
+          <Text style={styles.label}>First Name</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="First name"
+            value={firstName}
+            onChangeText={onFirstNameChange}
+            autoCapitalize="words"
+          />
+        </View>
+        <View style={{ flex: 1 }}>
+          <Text style={styles.label}>Last Name</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="Last name"
+            value={lastName}
+            onChangeText={onLastNameChange}
+            autoCapitalize="words"
+          />
+        </View>
       </View>
 
+      <Text style={styles.label}>Phone Number</Text>
       <TextInput
-        style={[styles.input, { marginTop: 8 }]}
-        placeholder="phone number"
+        style={styles.input}
+        placeholder="Contact number"
         value={contactNumber}
         onChangeText={onNumberChange}
         keyboardType="phone-pad"
       />
 
-      <View style={styles.buttonRow}>
-        <Button title={submitLabel} onPress={onSubmit} />
+      <View style={styles.buttonContainer}>
+        <Button title="Save Changes" onPress={onSave} />
+      </View>
+
+      <View style={styles.buttonContainer}>
+        <TouchableOpacity style={styles.deleteButton} onPress={onDelete}>
+          <Text style={styles.deleteButtonText}>Delete Contact</Text>
+        </TouchableOpacity>
+      </View>
+
+      <View style={styles.buttonContainer}>
+        <Button title="Cancel" onPress={onCancel} color="#666" />
       </View>
     </View>
   );
@@ -75,17 +93,16 @@ export default function ContactForm({
 
 const styles = StyleSheet.create({
   formCard: {
+    gap: 16,
     backgroundColor: "#f8f8f8",
     borderRadius: 12,
-    padding: 12,
-    marginTop: 8,
+    padding: 16,
     borderWidth: 1,
     borderColor: "#eee",
-    gap: 12,
   },
   imagePreview: {
     alignItems: "center",
-    marginBottom: 4,
+    marginBottom: 8,
     position: "relative",
   },
   tapHint: {
@@ -109,12 +126,34 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: "bold",
   },
-  row: { flexDirection: "row", alignItems: "center", gap: 8 },
-  input: { borderWidth: 1, borderColor: "#ccc", padding: 10, borderRadius: 8 },
-  buttonRow: {
+  row: {
     flexDirection: "row",
-    alignItems: "center",
+    gap: 12,
+  },
+  label: {
+    fontSize: 16,
+    fontWeight: "600",
+    marginBottom: 4,
+  },
+  input: {
+    borderWidth: 1,
+    borderColor: "#ccc",
+    padding: 12,
+    borderRadius: 8,
+    fontSize: 16,
+  },
+  buttonContainer: {
     marginTop: 4,
-    justifyContent: "flex-end",
+  },
+  deleteButton: {
+    backgroundColor: "#c00",
+    padding: 12,
+    borderRadius: 8,
+    alignItems: "center",
+  },
+  deleteButtonText: {
+    color: "#fff",
+    fontSize: 16,
+    fontWeight: "600",
   },
 });

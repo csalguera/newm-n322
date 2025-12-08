@@ -17,7 +17,7 @@ import * as ImagePicker from "expo-image-picker";
 import { useAuth } from "../../auth/AuthContext";
 import { db } from "../../firebase/firebaseConfig";
 import { doc, getDoc, updateDoc, deleteDoc } from "firebase/firestore";
-import Avatar from "../../components/Avatar";
+import ContactDetailForm from "../../components/ContactDetailForm";
 
 const formatPhone = (value = "") => {
   const digits = value.replace(/\D/g, "").slice(0, 10);
@@ -212,72 +212,20 @@ export default function ContactDetail() {
       >
         <Text style={styles.title}>Edit Contact</Text>
 
-        <View style={styles.formCard}>
-          <View style={styles.imagePreview}>
-            <Avatar
-              uri={imageUri}
-              name={`${firstName} ${lastName}`}
-              size={120}
-              borderColor="#06c"
-              borderWidth={2}
-            />
-          </View>
-
-          <TouchableOpacity style={styles.photoButton} onPress={pickImage}>
-            <Text style={styles.photoButtonText}>
-              {imageUri ? "📷 Change Photo" : "📷 Add Photo"}
-            </Text>
-          </TouchableOpacity>
-
-          <View style={styles.row}>
-            <View style={{ flex: 1 }}>
-              <Text style={styles.label}>First Name</Text>
-              <TextInput
-                style={styles.input}
-                placeholder="First name"
-                value={firstName}
-                onChangeText={setFirstName}
-                autoCapitalize="words"
-              />
-            </View>
-            <View style={{ flex: 1 }}>
-              <Text style={styles.label}>Last Name</Text>
-              <TextInput
-                style={styles.input}
-                placeholder="Last name"
-                value={lastName}
-                onChangeText={setLastName}
-                autoCapitalize="words"
-              />
-            </View>
-          </View>
-
-          <Text style={styles.label}>Phone Number</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="Contact number"
-            value={contactNumber}
-            onChangeText={(text) => setContactNumber(formatPhone(text))}
-            keyboardType="phone-pad"
-          />
-
-          <View style={styles.buttonContainer}>
-            <Button title="Save Changes" onPress={saveChanges} />
-          </View>
-
-          <View style={styles.buttonContainer}>
-            <TouchableOpacity
-              style={styles.deleteButton}
-              onPress={deleteContact}
-            >
-              <Text style={styles.deleteButtonText}>Delete Contact</Text>
-            </TouchableOpacity>
-          </View>
-
-          <View style={styles.buttonContainer}>
-            <Button title="Cancel" onPress={() => router.back()} color="#666" />
-          </View>
-        </View>
+        <ContactDetailForm
+          firstName={firstName}
+          lastName={lastName}
+          contactNumber={contactNumber}
+          imageUri={imageUri}
+          onFirstNameChange={setFirstName}
+          onLastNameChange={setLastName}
+          onNumberChange={(text) => setContactNumber(formatPhone(text))}
+          onPickImage={pickImage}
+          onRemoveImage={() => setImageUri(null)}
+          onSave={saveChanges}
+          onDelete={deleteContact}
+          onCancel={() => router.back()}
+        />
       </ScrollView>
     </TouchableWithoutFeedback>
   );
@@ -299,60 +247,5 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: "700",
     marginBottom: 24,
-  },
-  formCard: {
-    gap: 16,
-    backgroundColor: "#f8f8f8",
-    borderRadius: 12,
-    padding: 16,
-    borderWidth: 1,
-    borderColor: "#eee",
-  },
-  imagePreview: {
-    alignItems: "center",
-    marginBottom: 8,
-  },
-  row: {
-    flexDirection: "row",
-    gap: 12,
-  },
-  photoButton: {
-    backgroundColor: "#f0f0f0",
-    padding: 12,
-    borderRadius: 8,
-    alignItems: "center",
-    borderWidth: 1,
-    borderColor: "#ddd",
-  },
-  photoButtonText: {
-    fontSize: 16,
-    fontWeight: "600",
-    color: "#333",
-  },
-  label: {
-    fontSize: 16,
-    fontWeight: "600",
-    marginBottom: 4,
-  },
-  input: {
-    borderWidth: 1,
-    borderColor: "#ccc",
-    padding: 12,
-    borderRadius: 8,
-    fontSize: 16,
-  },
-  buttonContainer: {
-    marginTop: 8,
-  },
-  deleteButton: {
-    backgroundColor: "#c00",
-    padding: 12,
-    borderRadius: 8,
-    alignItems: "center",
-  },
-  deleteButtonText: {
-    color: "#fff",
-    fontSize: 16,
-    fontWeight: "600",
   },
 });
