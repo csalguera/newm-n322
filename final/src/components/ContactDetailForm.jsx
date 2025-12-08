@@ -2,11 +2,11 @@ import {
   View,
   Text,
   TextInput,
-  Button,
   StyleSheet,
   TouchableOpacity,
 } from "react-native";
 import Avatar from "./Avatar";
+import { colors, spacing, borderRadius, typography } from "../styles/theme";
 
 export default function ContactDetailForm({
   firstName,
@@ -30,7 +30,7 @@ export default function ContactDetailForm({
             uri={imageUri}
             name={`${firstName} ${lastName}`}
             size={120}
-            borderColor="#06c"
+            borderColor={colors.primary}
             borderWidth={2}
           />
         </TouchableOpacity>
@@ -48,6 +48,7 @@ export default function ContactDetailForm({
           <TextInput
             style={styles.input}
             placeholder="First name"
+            placeholderTextColor={colors.textTertiary}
             value={firstName}
             onChangeText={onFirstNameChange}
             autoCapitalize="words"
@@ -58,6 +59,7 @@ export default function ContactDetailForm({
           <TextInput
             style={styles.input}
             placeholder="Last name"
+            placeholderTextColor={colors.textTertiary}
             value={lastName}
             onChangeText={onLastNameChange}
             autoCapitalize="words"
@@ -69,91 +71,112 @@ export default function ContactDetailForm({
       <TextInput
         style={styles.input}
         placeholder="Contact number"
+        placeholderTextColor={colors.textTertiary}
         value={contactNumber}
         onChangeText={onNumberChange}
         keyboardType="phone-pad"
       />
 
-      <View style={styles.buttonContainer}>
-        <Button title="Save Changes" onPress={onSave} />
-      </View>
+      <TouchableOpacity style={styles.saveButton} onPress={onSave}>
+        <Text style={styles.saveButtonText}>Save Changes</Text>
+      </TouchableOpacity>
 
-      <View style={styles.buttonContainer}>
-        <TouchableOpacity style={styles.deleteButton} onPress={onDelete}>
-          <Text style={styles.deleteButtonText}>Delete Contact</Text>
-        </TouchableOpacity>
-      </View>
+      <TouchableOpacity style={styles.deleteButton} onPress={onDelete}>
+        <Text style={styles.deleteButtonText}>Delete Contact</Text>
+      </TouchableOpacity>
 
-      <View style={styles.buttonContainer}>
-        <Button title="Cancel" onPress={onCancel} color="#666" />
-      </View>
+      <TouchableOpacity style={styles.cancelButton} onPress={onCancel}>
+        <Text style={styles.cancelButtonText}>Cancel</Text>
+      </TouchableOpacity>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   formCard: {
-    gap: 16,
-    backgroundColor: "#f8f8f8",
-    borderRadius: 12,
-    padding: 16,
+    gap: spacing.lg,
+    backgroundColor: colors.backgroundAlt,
+    borderRadius: borderRadius.lg,
+    padding: spacing.lg,
     borderWidth: 1,
-    borderColor: "#eee",
+    borderColor: colors.border,
   },
   imagePreview: {
     alignItems: "center",
-    marginBottom: 8,
+    marginBottom: spacing.sm,
     position: "relative",
   },
   tapHint: {
-    marginTop: 8,
-    color: "#666",
-    fontSize: 12,
+    marginTop: spacing.md,
+    ...typography.bodySm,
+    color: colors.textSecondary,
   },
   removeImage: {
     position: "absolute",
     top: 4,
     right: 40,
-    backgroundColor: "#c00",
-    borderRadius: 12,
-    width: 24,
-    height: 24,
+    backgroundColor: colors.error,
+    borderRadius: borderRadius.full,
+    width: 28,
+    height: 28,
     justifyContent: "center",
     alignItems: "center",
   },
   removeImageText: {
-    color: "#fff",
-    fontSize: 14,
+    color: colors.white,
+    fontSize: 16,
     fontWeight: "bold",
   },
   row: {
     flexDirection: "row",
-    gap: 12,
+    gap: spacing.md,
   },
   label: {
-    fontSize: 16,
-    fontWeight: "600",
-    marginBottom: 4,
+    ...typography.bodySmMedium,
+    color: colors.textPrimary,
+    marginBottom: spacing.xs,
   },
   input: {
     borderWidth: 1,
-    borderColor: "#ccc",
-    padding: 12,
-    borderRadius: 8,
-    fontSize: 16,
+    borderColor: colors.border,
+    padding: spacing.md,
+    borderRadius: borderRadius.md,
+    ...typography.body,
+    color: colors.textPrimary,
+    backgroundColor: colors.white,
   },
-  buttonContainer: {
-    marginTop: 4,
+  saveButton: {
+    backgroundColor: colors.success,
+    padding: spacing.lg,
+    borderRadius: borderRadius.md,
+    alignItems: "center",
+    marginTop: spacing.md,
+  },
+  saveButtonText: {
+    color: colors.white,
+    ...typography.bodyMedium,
+    fontWeight: "700",
   },
   deleteButton: {
-    backgroundColor: "#c00",
-    padding: 12,
-    borderRadius: 8,
+    backgroundColor: colors.error,
+    padding: spacing.lg,
+    borderRadius: borderRadius.md,
     alignItems: "center",
   },
   deleteButtonText: {
-    color: "#fff",
-    fontSize: 16,
-    fontWeight: "600",
+    color: colors.white,
+    ...typography.bodyMedium,
+    fontWeight: "700",
+  },
+  cancelButton: {
+    backgroundColor: colors.gray200,
+    padding: spacing.lg,
+    borderRadius: borderRadius.md,
+    alignItems: "center",
+  },
+  cancelButtonText: {
+    color: colors.textPrimary,
+    ...typography.bodyMedium,
+    fontWeight: "700",
   },
 });

@@ -1,14 +1,15 @@
 import { Image, Text, View } from "react-native";
+import { colors, borderRadius } from "../styles/theme";
 
 // Reusable avatar with optional image and initial fallback
 export default function Avatar({
   uri,
   name = "",
   size = 50,
-  borderColor = "#ddd",
+  borderColor = colors.gray200,
   borderWidth = 1,
-  placeholderBg = "#e9e9e9",
-  textColor = "#555",
+  placeholderBg = colors.avatarBg,
+  textColor = colors.avatarText,
   style,
 }) {
   const firstLetter = (name || "").trim().charAt(0).toUpperCase() || "?";

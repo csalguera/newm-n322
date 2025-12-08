@@ -1,8 +1,7 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import {
   View,
   Text,
-  Button,
   StyleSheet,
   TextInput,
   TouchableOpacity,
@@ -17,6 +16,7 @@ import {
   EmailAuthProvider,
 } from "firebase/auth";
 import { useAuth } from "../../auth/AuthContext";
+import { colors, spacing, borderRadius, typography } from "../../styles/theme";
 
 const Settings = () => {
   const { user, signOut } = useAuth();
@@ -83,54 +83,66 @@ const Settings = () => {
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Password</Text>
           {!showPasswordForm ? (
-            <Button
-              title="Change Password"
+            <TouchableOpacity
+              style={styles.button}
               onPress={() => setShowPasswordForm(true)}
-            />
+            >
+              <Text style={styles.buttonText}>Change Password</Text>
+            </TouchableOpacity>
           ) : (
             <View style={styles.form}>
-              <TextInput
-                style={styles.input}
-                placeholder="Current password"
-                value={currentPassword}
-                onChangeText={setCurrentPassword}
-                secureTextEntry
-              />
-              <TextInput
-                style={styles.input}
-                placeholder="New password"
-                value={newPassword}
-                onChangeText={setNewPassword}
-                secureTextEntry
-              />
-              <TextInput
-                style={styles.input}
-                placeholder="Confirm new password"
-                value={confirmPassword}
-                onChangeText={setConfirmPassword}
-                secureTextEntry
-              />
+              <View style={styles.fieldContainer}>
+                <Text style={styles.label}>Current Password</Text>
+                <TextInput
+                  style={styles.input}
+                  placeholder="Enter current password"
+                  placeholderTextColor={colors.textTertiary}
+                  value={currentPassword}
+                  onChangeText={setCurrentPassword}
+                  secureTextEntry
+                />
+              </View>
+              <View style={styles.fieldContainer}>
+                <Text style={styles.label}>New Password</Text>
+                <TextInput
+                  style={styles.input}
+                  placeholder="Enter new password"
+                  placeholderTextColor={colors.textTertiary}
+                  value={newPassword}
+                  onChangeText={setNewPassword}
+                  secureTextEntry
+                />
+              </View>
+              <View style={styles.fieldContainer}>
+                <Text style={styles.label}>Confirm Password</Text>
+                <TextInput
+                  style={styles.input}
+                  placeholder="Confirm new password"
+                  placeholderTextColor={colors.textTertiary}
+                  value={confirmPassword}
+                  onChangeText={setConfirmPassword}
+                  secureTextEntry
+                />
+              </View>
               <View style={styles.buttonRow}>
-                <View style={{ flex: 1 }}>
-                  <Button
-                    title="Save"
-                    onPress={handlePasswordChange}
-                    disabled={loading}
-                  />
-                </View>
-                <View style={{ width: 8 }} />
-                <View style={{ flex: 1 }}>
-                  <Button
-                    title="Cancel"
-                    onPress={() => {
-                      setShowPasswordForm(false);
-                      setCurrentPassword("");
-                      setNewPassword("");
-                      setConfirmPassword("");
-                    }}
-                    color="#666"
-                  />
-                </View>
+                <TouchableOpacity
+                  style={styles.saveButton}
+                  onPress={handlePasswordChange}
+                  disabled={loading}
+                >
+                  <Text style={styles.saveButtonText}>Save</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={styles.cancelButton}
+                  onPress={() => {
+                    setShowPasswordForm(false);
+                    setCurrentPassword("");
+                    setNewPassword("");
+                    setConfirmPassword("");
+                  }}
+                >
+                  <Text style={styles.cancelButtonText}>Cancel</Text>
+                </TouchableOpacity>
               </View>
             </View>
           )}
@@ -150,60 +162,108 @@ const Settings = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#fff",
+    backgroundColor: colors.white,
   },
   scroll: {
-    padding: 16,
-    paddingTop: 80,
+    paddingHorizontal: spacing.lg,
+    paddingTop: spacing.xl + spacing.lg,
   },
   content: {
-    paddingBottom: 32,
+    paddingBottom: spacing.xxl,
+  },
+  header: {
+    marginBottom: spacing.xl,
   },
   title: {
-    fontSize: 22,
-    fontWeight: "700",
-    marginBottom: 8,
+    ...typography.h2,
+    color: colors.textPrimary,
+    marginBottom: spacing.xs,
   },
   subtitle: {
-    marginBottom: 24,
-    color: "#666",
+    ...typography.bodySm,
+    color: colors.textSecondary,
   },
   section: {
-    marginBottom: 24,
-    paddingBottom: 16,
+    marginBottom: spacing.xl,
+    paddingBottom: spacing.lg,
     borderBottomWidth: 1,
-    borderBottomColor: "#eee",
+    borderBottomColor: colors.border,
   },
   sectionTitle: {
-    fontSize: 16,
-    fontWeight: "600",
-    marginBottom: 12,
+    ...typography.bodyMedium,
+    color: colors.textPrimary,
+    marginBottom: spacing.md,
+  },
+  button: {
+    backgroundColor: colors.primary,
+    paddingVertical: spacing.md,
+    paddingHorizontal: spacing.lg,
+    borderRadius: borderRadius.md,
+    alignItems: "center",
+  },
+  buttonText: {
+    ...typography.bodyMedium,
+    color: colors.white,
+    fontWeight: "700",
   },
   form: {
-    gap: 12,
+    gap: spacing.md,
+  },
+  fieldContainer: {
+    gap: spacing.xs,
+  },
+  label: {
+    ...typography.bodySmMedium,
+    color: colors.textPrimary,
   },
   input: {
     borderWidth: 1,
-    borderColor: "#ccc",
-    padding: 12,
-    borderRadius: 8,
-    fontSize: 16,
+    borderColor: colors.border,
+    padding: spacing.md,
+    borderRadius: borderRadius.md,
+    ...typography.body,
+    color: colors.textPrimary,
+    backgroundColor: colors.white,
   },
   buttonRow: {
     flexDirection: "row",
-    gap: 8,
-    marginTop: 8,
+    gap: spacing.md,
+    marginTop: spacing.md,
+  },
+  saveButton: {
+    flex: 1,
+    backgroundColor: colors.success,
+    paddingVertical: spacing.md,
+    borderRadius: borderRadius.md,
+    alignItems: "center",
+  },
+  saveButtonText: {
+    ...typography.bodyMedium,
+    color: colors.white,
+    fontWeight: "700",
+  },
+  cancelButton: {
+    flex: 1,
+    backgroundColor: colors.gray200,
+    paddingVertical: spacing.md,
+    borderRadius: borderRadius.md,
+    alignItems: "center",
+  },
+  cancelButtonText: {
+    ...typography.bodyMedium,
+    color: colors.textPrimary,
+    fontWeight: "700",
   },
   signOutButton: {
-    backgroundColor: "#c00",
-    padding: 12,
-    borderRadius: 8,
+    backgroundColor: colors.error,
+    paddingVertical: spacing.lg,
+    borderRadius: borderRadius.md,
     alignItems: "center",
   },
   signOutText: {
-    color: "#fff",
-    fontSize: 16,
-    fontWeight: "600",
+    ...typography.bodyMedium,
+    color: colors.white,
+    fontWeight: "700",
   },
 });
 

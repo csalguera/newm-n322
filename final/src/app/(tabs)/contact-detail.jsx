@@ -3,7 +3,6 @@ import {
   View,
   Text,
   TextInput,
-  Button,
   StyleSheet,
   Alert,
   TouchableOpacity,
@@ -18,6 +17,7 @@ import { useAuth } from "../../auth/AuthContext";
 import { db } from "../../firebase/firebaseConfig";
 import { doc, getDoc, updateDoc, deleteDoc } from "firebase/firestore";
 import ContactDetailForm from "../../components/ContactDetailForm";
+import { colors, spacing, borderRadius, typography } from "../../styles/theme";
 
 const formatPhone = (value = "") => {
   const digits = value.replace(/\D/g, "").slice(0, 10);
@@ -197,8 +197,8 @@ export default function ContactDetail() {
 
   if (loading) {
     return (
-      <View style={styles.container}>
-        <Text>Loading...</Text>
+      <View style={styles.loadingContainer}>
+        <Text style={styles.loadingText}>Loading...</Text>
       </View>
     );
   }
@@ -234,18 +234,27 @@ export default function ContactDetail() {
 const styles = StyleSheet.create({
   scroll: {
     flex: 1,
-    backgroundColor: "#fff",
+    backgroundColor: colors.white,
   },
   container: {
     flexGrow: 1,
-    padding: 16,
-    paddingTop: 60,
-    paddingBottom: 32,
-    backgroundColor: "#fff",
+    paddingHorizontal: spacing.lg,
+    paddingTop: spacing.xl + spacing.lg,
+    paddingBottom: spacing.xxl,
+    backgroundColor: colors.white,
   },
   title: {
-    fontSize: 24,
-    fontWeight: "700",
-    marginBottom: 24,
+    ...typography.h2,
+    color: colors.textPrimary,
+    marginBottom: spacing.xl,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  loadingText: {
+    ...typography.body,
+    color: colors.textSecondary,
   },
 });

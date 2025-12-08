@@ -1,42 +1,59 @@
 import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
 import Avatar from "./Avatar";
+import {
+  colors,
+  spacing,
+  borderRadius,
+  shadows,
+  typography,
+} from "../styles/theme";
 
 export default function ContactListItem({ name, number, imageUri, onPress }) {
   return (
-    <TouchableOpacity style={styles.card} onPress={onPress}>
+    <TouchableOpacity style={styles.card} onPress={onPress} activeOpacity={0.7}>
       <Avatar
         uri={imageUri}
         name={name}
-        size={50}
-        borderColor="#ddd"
-        borderWidth={1}
+        size={56}
+        borderColor={colors.border}
+        borderWidth={0}
       />
       <View style={styles.contactInfo}>
         <Text style={styles.contact}>{name}</Text>
         <Text style={styles.contactNumber}>{number}</Text>
       </View>
-      <Text style={styles.arrow}>→</Text>
+      <Text style={styles.arrow}>›</Text>
     </TouchableOpacity>
   );
 }
 
 const styles = StyleSheet.create({
   card: {
-    padding: 16,
-    borderWidth: 1,
-    borderColor: "#eee",
-    borderRadius: 10,
-    marginBottom: 8,
+    paddingVertical: spacing.md,
+    paddingHorizontal: spacing.lg,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.border,
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    backgroundColor: "#fafafa",
+    backgroundColor: colors.white,
   },
   contactInfo: {
     flex: 1,
-    marginHorizontal: 12,
+    marginHorizontal: spacing.lg,
   },
-  contact: { fontSize: 18, fontWeight: "600", marginBottom: 4 },
-  contactNumber: { fontSize: 16, color: "#666" },
-  arrow: { fontSize: 24, color: "#06c", marginLeft: 12 },
+  contact: {
+    ...typography.bodyMedium,
+    color: colors.textPrimary,
+    marginBottom: spacing.xs,
+  },
+  contactNumber: {
+    ...typography.bodySm,
+    color: colors.textSecondary,
+  },
+  arrow: {
+    fontSize: 28,
+    color: colors.textSecondary,
+    marginLeft: spacing.md,
+  },
 });

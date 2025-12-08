@@ -3,7 +3,6 @@ import {
   View,
   Text,
   TextInput,
-  Button,
   FlatList,
   TouchableOpacity,
   StyleSheet,
@@ -26,6 +25,7 @@ import {
 } from "firebase/firestore";
 import ContactForm from "../../components/ContactForm";
 import ContactListItem from "../../components/ContactListItem";
+import { colors, spacing, borderRadius, typography } from "../../styles/theme";
 
 const formatPhone = (value = "") => {
   const digits = value.replace(/\D/g, "").slice(0, 10);
@@ -63,8 +63,7 @@ export default function ContactsList() {
     );
     const unsub = onSnapshot(q, (snap) =>
       setItems(
-        snap
-          .docs
+        snap.docs
           .map((d) => ({ id: d.id, ...d.data() }))
           .sort((a, b) => getDisplayName(a).localeCompare(getDisplayName(b)))
       )
@@ -156,13 +155,19 @@ export default function ContactsList() {
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
       <View style={styles.container}>
-        <Text style={styles.title}>Your Contacts</Text>
-        <View style={styles.toggleRow}>
-          <Button
-            title={showForm ? "Hide Form" : "Create Contact"}
-            onPress={() => setShowForm((prev) => !prev)}
-          />
+        <View style={styles.header}>
+          <Text style={styles.title}>Your Contacts</Text>
+          <Text style={styles.subtitle}>{items.length} contacts</Text>
         </View>
+
+        <TouchableOpacity
+          style={[styles.createButton, showForm && styles.createButtonActive]}
+          onPress={() => setShowForm((prev) => !prev)}
+        >
+          <Text style={styles.createButtonText}>
+            {showForm ? "Hide Form" : "+ Create Contact"}
+          </Text>
+        </TouchableOpacity>
 
         {showForm && (
           <ContactForm
@@ -181,7 +186,7 @@ export default function ContactsList() {
         )}
 
         <FlatList
-          style={{ marginTop: 16 }}
+          style={styles.list}
           data={items}
           keyExtractor={(item) => item.id}
           renderItem={({ item }) => (
@@ -195,16 +200,77 @@ export default function ContactsList() {
             />
           )}
           ListEmptyComponent={
-            <Text style={styles.subtle}>No contacts yet. Add one above ↑</Text>
+            <View style={styles.emptyState}>
+              <Text style={styles.emptyTitle}>No contacts yet</Text>
+              <Text style={styles.emptySubtitle}>
+                Create one to get started
+              </Text>
+            </View>
           }
+          scrollEnabled={false}
         />
       </View>
     </TouchableWithoutFeedback>
   );
 }
+
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 16, paddingTop: 60, backgroundColor: "#fff" },
-  title: { fontSize: 24, fontWeight: "700", marginBottom: 8 },
-  toggleRow: { marginTop: 4, alignItems: "flex-start" },
-  subtle: { color: "#666", marginTop: 8 },
+  container: {
+    flex: 1,
+    backgroundColor: colors.white,
+  },
+  header: {
+    paddingHorizontal: spacing.lg,
+    paddingTop: spacing.xl + spacing.lg,
+    paddingBottom: spacing.lg,
+    backgroundColor: colors.white,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.border,
+  },
+  title: {
+    ...typography.h2,
+    color: colors.textPrimary,
+    marginBottom: spacing.xs,
+  },
+  subtitle: {
+    ...typography.bodySm,
+    color: colors.textSecondary,
+  },
+  createButton: {
+    marginHorizontal: spacing.lg,
+    marginTop: spacing.lg,
+    marginBottom: spacing.lg,
+    backgroundColor: colors.primary,
+    paddingVertical: spacing.md,
+    paddingHorizontal: spacing.lg,
+    borderRadius: borderRadius.md,
+    alignItems: "center",
+  },
+  createButtonActive: {
+    backgroundColor: colors.primaryDark,
+  },
+  createButtonText: {
+    ...typography.bodyMedium,
+    color: colors.white,
+    fontWeight: "700",
+  },
+  list: {
+    flex: 1,
+    paddingHorizontal: spacing.lg,
+  },
+  emptyState: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: spacing.xl,
+  },
+  emptyTitle: {
+    ...typography.h4,
+    color: colors.textSecondary,
+    marginBottom: spacing.sm,
+  },
+  emptySubtitle: {
+    ...typography.body,
+    color: colors.textTertiary,
+  },
 });
