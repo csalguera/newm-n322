@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import {
   View,
   Text,
-  TextInput,
   FlatList,
   TouchableOpacity,
   StyleSheet,
@@ -26,32 +25,17 @@ import {
 import ContactForm from "../../components/ContactForm";
 import ContactListItem from "../../components/ContactListItem";
 import { colors, spacing, borderRadius, typography } from "../../styles/theme";
+import { formatPhoneNumber, isValidPhoneNumber } from "../../utils/phoneUtils";
+import { getContactDisplayName } from "../../utils/contactUtils";
 
-const formatPhone = (value = "") => {
-  const digits = value.replace(/\D/g, "").slice(0, 10);
-  if (digits.length <= 3) return digits;
-  if (digits.length <= 6) return `(${digits.slice(0, 3)}) ${digits.slice(3)}`;
-  return `(${digits.slice(0, 3)}) ${digits.slice(3, 6)}-${digits.slice(6)}`;
-};
-
-const digitsOnly = (value = "") => value.replace(/\D/g, "");
-const getDisplayName = (item = {}) => {
-  const first = (item.firstName || "").trim();
-  const last = (item.lastName || "").trim();
-  const combined = `${first} ${last}`.trim();
-  if (combined) return combined;
-  if (item.name) return item.name;
-  return "Unnamed";
-};
-
-export default function ContactsList() {
+export default function ContactsScreen() {
   const router = useRouter();
   const { user } = useAuth();
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [contactNumber, setContactNumber] = useState("");
   const [imageUri, setImageUri] = useState(null);
-  const [items, setItems] = useState([]);
+  const [contacts, setContacts] = useState([]);
   const [showForm, setShowForm] = useState(false);
 
   useEffect(() => {
@@ -61,11 +45,13 @@ export default function ContactsList() {
       where("ownerId", "==", user.uid),
       orderBy("createdAt", "desc")
     );
-    const unsub = onSnapshot(q, (snap) =>
-      setItems(
-        snap.docs
-          .map((d) => ({ id: d.id, ...d.data() }))
-          .sort((a, b) => getDisplayName(a).localeCompare(getDisplayName(b)))
+    const unsub = onSnapshot(q, (snapshot) =>
+      setContacts(
+        snapshot.docs
+          .map((doc) => ({ id: doc.id, ...doc.data() }))
+          .sort((a, b) =>
+            getContactDisplayName(a).localeCompare(getContactDisplayName(b))
+          )
       )
     );
     return unsub;
@@ -127,13 +113,12 @@ export default function ContactsList() {
       return;
     }
 
-    const digits = digitsOnly(contactNumber);
-    if (digits.length !== 10) {
+    if (!isValidPhoneNumber(contactNumber)) {
       Alert.alert("Invalid number", "Please enter a 10-digit phone number.");
       return;
     }
 
-    const formattedNumber = formatPhone(digits);
+    const formattedNumber = formatPhoneNumber(contactNumber);
     const fullName = `${first} ${last}`.trim();
 
     await addDoc(collection(db, "contacts"), {
@@ -157,7 +142,7 @@ export default function ContactsList() {
       <View style={styles.container}>
         <View style={styles.header}>
           <Text style={styles.title}>Your Contacts</Text>
-          <Text style={styles.subtitle}>{items.length} contacts</Text>
+          <Text style={styles.subtitle}>{contacts.length} contacts</Text>
         </View>
 
         <TouchableOpacity
@@ -177,7 +162,7 @@ export default function ContactsList() {
             imageUri={imageUri}
             onFirstNameChange={setFirstName}
             onLastNameChange={setLastName}
-            onNumberChange={(text) => setContactNumber(formatPhone(text))}
+            onNumberChange={(text) => setContactNumber(formatPhoneNumber(text))}
             onPickImage={pickImage}
             onRemoveImage={() => setImageUri(null)}
             onSubmit={addContact}
@@ -187,12 +172,12 @@ export default function ContactsList() {
 
         <FlatList
           style={styles.list}
-          data={items}
-          keyExtractor={(item) => item.id}
+          data={contacts}
+          keyExtractor={(contact) => contact.id}
           renderItem={({ item }) => (
             <ContactListItem
-              name={getDisplayName(item)}
-              number={formatPhone(item.number || "")}
+              name={getContactDisplayName(item)}
+              number={formatPhoneNumber(item.number || "")}
               imageUri={item.imageUri}
               onPress={() =>
                 router.push(`/(tabs)/contact-detail?id=${item.id}`)

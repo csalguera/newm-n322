@@ -8,7 +8,7 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(undefined);
 
   useEffect(() => {
-    onAuthStateChanged(auth, (u) => setUser(u ?? null));
+    onAuthStateChanged(auth, (currentUser) => setUser(currentUser ?? null));
   }, []);
 
   return (

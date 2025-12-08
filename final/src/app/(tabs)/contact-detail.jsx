@@ -6,7 +6,6 @@ import {
   StyleSheet,
   Alert,
   TouchableOpacity,
-  Image,
   ScrollView,
   Keyboard,
   TouchableWithoutFeedback,
@@ -18,21 +17,8 @@ import { db } from "../../firebase/firebaseConfig";
 import { doc, getDoc, updateDoc, deleteDoc } from "firebase/firestore";
 import ContactDetailForm from "../../components/ContactDetailForm";
 import { colors, spacing, borderRadius, typography } from "../../styles/theme";
-
-const formatPhone = (value = "") => {
-  const digits = value.replace(/\D/g, "").slice(0, 10);
-  if (digits.length <= 3) return digits;
-  if (digits.length <= 6) return `(${digits.slice(0, 3)}) ${digits.slice(3)}`;
-  return `(${digits.slice(0, 3)}) ${digits.slice(3, 6)}-${digits.slice(6)}`;
-};
-
-const digitsOnly = (value = "") => value.replace(/\D/g, "");
-const splitName = (name = "") => {
-  const parts = name.trim().split(" ");
-  if (!parts.length) return { first: "", last: "" };
-  const [first, ...rest] = parts;
-  return { first, last: rest.join(" ").trim() };
-};
+import { formatPhoneNumber, isValidPhoneNumber } from "../../utils/phoneUtils";
+import { splitFullName } from "../../utils/contactUtils";
 
 export default function ContactDetail() {
   const { id } = useLocalSearchParams();
@@ -55,11 +41,12 @@ export default function ContactDetail() {
         if (docSnap.exists()) {
           const data = docSnap.data();
           if (data.ownerId === user.uid) {
-            const first = data.firstName || splitName(data.name || "").first;
-            const last = data.lastName || splitName(data.name || "").last;
+            const first =
+              data.firstName || splitFullName(data.name || "").first;
+            const last = data.lastName || splitFullName(data.name || "").last;
             setFirstName(first || "");
             setLastName(last || "");
-            setContactNumber(formatPhone(data.number || ""));
+            setContactNumber(formatPhoneNumber(data.number || ""));
             setImageUri(data.imageUri || null);
           } else {
             Alert.alert(
@@ -149,14 +136,13 @@ export default function ContactDetail() {
       return;
     }
 
-    try {
-      const digits = digitsOnly(contactNumber);
-      if (digits.length !== 10) {
-        Alert.alert("Invalid number", "Please enter a 10-digit phone number.");
-        return;
-      }
+    if (!isValidPhoneNumber(contactNumber)) {
+      Alert.alert("Invalid number", "Please enter a 10-digit phone number.");
+      return;
+    }
 
-      const formattedNumber = formatPhone(digits);
+    try {
+      const formattedNumber = formatPhoneNumber(contactNumber);
       await updateDoc(doc(db, "contacts", id), {
         firstName: first,
         lastName: last,
@@ -219,7 +205,7 @@ export default function ContactDetail() {
           imageUri={imageUri}
           onFirstNameChange={setFirstName}
           onLastNameChange={setLastName}
-          onNumberChange={(text) => setContactNumber(formatPhone(text))}
+          onNumberChange={(text) => setContactNumber(formatPhoneNumber(text))}
           onPickImage={pickImage}
           onRemoveImage={() => setImageUri(null)}
           onSave={saveChanges}
