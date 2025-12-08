@@ -52,6 +52,7 @@ export default function ContactsList() {
   const [contactNumber, setContactNumber] = useState("");
   const [imageUri, setImageUri] = useState(null);
   const [items, setItems] = useState([]);
+  const [showForm, setShowForm] = useState(false);
 
   useEffect(() => {
     if (!user) return;
@@ -151,20 +152,28 @@ export default function ContactsList() {
     <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
       <View style={styles.container}>
         <Text style={styles.title}>Your Contacts</Text>
+        <View style={styles.toggleRow}>
+          <Button
+            title={showForm ? "Hide Form" : "Create Contact"}
+            onPress={() => setShowForm((prev) => !prev)}
+          />
+        </View>
 
-        <ContactForm
-          firstName={firstName}
-          lastName={lastName}
-          contactNumber={contactNumber}
-          imageUri={imageUri}
-          onFirstNameChange={setFirstName}
-          onLastNameChange={setLastName}
-          onNumberChange={(text) => setContactNumber(formatPhone(text))}
-          onPickImage={pickImage}
-          onRemoveImage={() => setImageUri(null)}
-          onSubmit={addContact}
-          submitLabel="Add Contact"
-        />
+        {showForm && (
+          <ContactForm
+            firstName={firstName}
+            lastName={lastName}
+            contactNumber={contactNumber}
+            imageUri={imageUri}
+            onFirstNameChange={setFirstName}
+            onLastNameChange={setLastName}
+            onNumberChange={(text) => setContactNumber(formatPhone(text))}
+            onPickImage={pickImage}
+            onRemoveImage={() => setImageUri(null)}
+            onSubmit={addContact}
+            submitLabel="Add Contact"
+          />
+        )}
 
         <FlatList
           style={{ marginTop: 16 }}
@@ -191,5 +200,6 @@ export default function ContactsList() {
 const styles = StyleSheet.create({
   container: { flex: 1, padding: 16, paddingTop: 60, backgroundColor: "#fff" },
   title: { fontSize: 24, fontWeight: "700", marginBottom: 8 },
+  toggleRow: { marginTop: 4, alignItems: "flex-start" },
   subtle: { color: "#666", marginTop: 8 },
 });
