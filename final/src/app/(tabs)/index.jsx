@@ -7,7 +7,6 @@ import {
   FlatList,
   TouchableOpacity,
   StyleSheet,
-  Image,
   Alert,
   Keyboard,
   TouchableWithoutFeedback,
@@ -25,7 +24,8 @@ import {
   orderBy,
   serverTimestamp,
 } from "firebase/firestore";
-import Avatar from "../../components/Avatar";
+import ContactForm from "../../components/ContactForm";
+import ContactListItem from "../../components/ContactListItem";
 
 const formatPhone = (value = "") => {
   const digits = value.replace(/\D/g, "").slice(0, 10);
@@ -152,77 +152,33 @@ export default function ContactsList() {
       <View style={styles.container}>
         <Text style={styles.title}>Your Contacts</Text>
 
-        {imageUri && (
-          <View style={styles.imagePreview}>
-            <Image source={{ uri: imageUri }} style={styles.image} />
-            <TouchableOpacity
-              style={styles.removeImage}
-              onPress={() => setImageUri(null)}
-            >
-              <Text style={styles.removeImageText}>✕</Text>
-            </TouchableOpacity>
-          </View>
-        )}
-
-        <View style={styles.formCard}>
-          <View style={styles.row}>
-            <TextInput
-              style={[styles.input, { flex: 1 }]}
-              placeholder="first name"
-              value={firstName}
-              onChangeText={setFirstName}
-              autoCapitalize="words"
-            />
-            <TextInput
-              style={[styles.input, { flex: 1 }]}
-              placeholder="last name"
-              value={lastName}
-              onChangeText={setLastName}
-              autoCapitalize="words"
-            />
-          </View>
-
-          <TextInput
-            style={[styles.input, { marginTop: 8 }]}
-            placeholder="phone number"
-            value={contactNumber}
-            onChangeText={(text) => setContactNumber(formatPhone(text))}
-            keyboardType="phone-pad"
-          />
-
-          <View style={styles.buttonRow}>
-            <Button title="📷 Add Photo" onPress={pickImage} color="#666" />
-            <View style={{ width: 8 }} />
-            <Button title="Add Contact" onPress={addContact} />
-          </View>
-        </View>
+        <ContactForm
+          firstName={firstName}
+          lastName={lastName}
+          contactNumber={contactNumber}
+          imageUri={imageUri}
+          onFirstNameChange={setFirstName}
+          onLastNameChange={setLastName}
+          onNumberChange={(text) => setContactNumber(formatPhone(text))}
+          onPickImage={pickImage}
+          onRemoveImage={() => setImageUri(null)}
+          onSubmit={addContact}
+          submitLabel="Add Contact"
+        />
 
         <FlatList
           style={{ marginTop: 16 }}
           data={items}
           keyExtractor={(item) => item.id}
           renderItem={({ item }) => (
-            <TouchableOpacity
-              style={styles.card}
+            <ContactListItem
+              name={getDisplayName(item)}
+              number={formatPhone(item.number || "")}
+              imageUri={item.imageUri}
               onPress={() =>
                 router.push(`/(tabs)/contact-detail?id=${item.id}`)
               }
-            >
-              <Avatar
-                uri={item.imageUri}
-                name={getDisplayName(item)}
-                size={50}
-                borderColor="#ddd"
-                borderWidth={1}
-              />
-              <View style={styles.contactInfo}>
-                <Text style={styles.contact}>{getDisplayName(item)}</Text>
-                <Text style={styles.contactNumber}>
-                  {formatPhone(item.number || "")}
-                </Text>
-              </View>
-              <Text style={styles.arrow}>→</Text>
-            </TouchableOpacity>
+            />
           )}
           ListEmptyComponent={
             <Text style={styles.subtle}>No contacts yet. Add one above ↑</Text>
@@ -235,61 +191,5 @@ export default function ContactsList() {
 const styles = StyleSheet.create({
   container: { flex: 1, padding: 16, paddingTop: 60, backgroundColor: "#fff" },
   title: { fontSize: 24, fontWeight: "700", marginBottom: 8 },
-  input: { borderWidth: 1, borderColor: "#ccc", padding: 10, borderRadius: 8 },
-  row: { flexDirection: "row", alignItems: "center", marginTop: 8, gap: 8 },
-  buttonRow: { flexDirection: "row", alignItems: "center", marginTop: 12 },
-  formCard: {
-    backgroundColor: "#f8f8f8",
-    borderRadius: 12,
-    padding: 12,
-    marginTop: 8,
-    borderWidth: 1,
-    borderColor: "#eee",
-  },
   subtle: { color: "#666", marginTop: 8 },
-  imagePreview: {
-    alignItems: "center",
-    marginVertical: 12,
-    position: "relative",
-  },
-  image: {
-    width: 120,
-    height: 120,
-    borderRadius: 60,
-    borderWidth: 2,
-    borderColor: "#06c",
-  },
-  removeImage: {
-    position: "absolute",
-    top: 0,
-    right: "35%",
-    backgroundColor: "#c00",
-    borderRadius: 12,
-    width: 24,
-    height: 24,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  removeImageText: {
-    color: "#fff",
-    fontSize: 14,
-    fontWeight: "bold",
-  },
-  card: {
-    padding: 16,
-    borderWidth: 1,
-    borderColor: "#eee",
-    borderRadius: 10,
-    marginBottom: 8,
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    backgroundColor: "#fafafa",
-  },
-  contactInfo: {
-    flex: 1,
-  },
-  contact: { fontSize: 18, fontWeight: "600", marginBottom: 4 },
-  contactNumber: { fontSize: 16, color: "#666" },
-  arrow: { fontSize: 24, color: "#06c", marginLeft: 12 },
 });
