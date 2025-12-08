@@ -62,7 +62,12 @@ export default function ContactsList() {
       orderBy("createdAt", "desc")
     );
     const unsub = onSnapshot(q, (snap) =>
-      setItems(snap.docs.map((d) => ({ id: d.id, ...d.data() })))
+      setItems(
+        snap
+          .docs
+          .map((d) => ({ id: d.id, ...d.data() }))
+          .sort((a, b) => getDisplayName(a).localeCompare(getDisplayName(b)))
+      )
     );
     return unsub;
   }, [user?.uid]);
