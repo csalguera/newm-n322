@@ -8,6 +8,7 @@ import {
   Alert,
   TouchableOpacity,
   Image,
+  ScrollView,
 } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import * as ImagePicker from "expo-image-picker";
@@ -168,7 +169,11 @@ export default function ContactDetail() {
   }
 
   return (
-    <View style={styles.container}>
+    <ScrollView
+      style={styles.scroll}
+      contentContainerStyle={styles.container}
+      keyboardShouldPersistTaps="handled"
+    >
       <Text style={styles.title}>Edit Contact</Text>
 
       <View style={styles.form}>
@@ -216,15 +221,20 @@ export default function ContactDetail() {
           <Button title="Cancel" onPress={() => router.back()} color="#666" />
         </View>
       </View>
-    </View>
+    </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
+  scroll: {
     flex: 1,
+    backgroundColor: "#fff",
+  },
+  container: {
+    flexGrow: 1,
     padding: 16,
     paddingTop: 60,
+    paddingBottom: 32,
     backgroundColor: "#fff",
   },
   title: {
