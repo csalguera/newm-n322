@@ -25,6 +25,7 @@ import {
   orderBy,
   serverTimestamp,
 } from "firebase/firestore";
+import Avatar from "../../components/Avatar";
 
 const formatPhone = (value = "") => {
   const digits = value.replace(/\D/g, "").slice(0, 10);
@@ -180,15 +181,13 @@ export default function ContactsList() {
                 router.push(`/(tabs)/contact-detail?id=${item.id}`)
               }
             >
-              {item.imageUri ? (
-                <Image source={{ uri: item.imageUri }} style={styles.avatar} />
-              ) : (
-                <View style={styles.avatarPlaceholder}>
-                  <Text style={styles.avatarPlaceholderText}>
-                    {(item.name || "").trim().charAt(0).toUpperCase() || "?"}
-                  </Text>
-                </View>
-              )}
+              <Avatar
+                uri={item.imageUri}
+                name={item.name}
+                size={50}
+                borderColor="#ddd"
+                borderWidth={1}
+              />
               <View style={styles.contactInfo}>
                 <Text style={styles.contact}>{item.name}</Text>
                 <Text style={styles.contactNumber}>
@@ -240,30 +239,6 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontSize: 14,
     fontWeight: "bold",
-  },
-  avatar: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
-    marginRight: 12,
-    borderWidth: 1,
-    borderColor: "#ddd",
-  },
-  avatarPlaceholder: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
-    marginRight: 12,
-    borderWidth: 1,
-    borderColor: "#ddd",
-    backgroundColor: "#e9e9e9",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  avatarPlaceholderText: {
-    fontSize: 18,
-    fontWeight: "700",
-    color: "#555",
   },
   card: {
     padding: 16,

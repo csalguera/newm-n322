@@ -17,6 +17,7 @@ import * as ImagePicker from "expo-image-picker";
 import { useAuth } from "../../auth/AuthContext";
 import { db } from "../../firebase/firebaseConfig";
 import { doc, getDoc, updateDoc, deleteDoc } from "firebase/firestore";
+import Avatar from "../../components/Avatar";
 
 const formatPhone = (value = "") => {
   const digits = value.replace(/\D/g, "").slice(0, 10);
@@ -197,15 +198,13 @@ export default function ContactDetail() {
 
         <View style={styles.form}>
           <View style={styles.imagePreview}>
-            {imageUri ? (
-              <Image source={{ uri: imageUri }} style={styles.image} />
-            ) : (
-              <View style={styles.imagePlaceholder}>
-                <Text style={styles.imagePlaceholderText}>
-                  {(contactName || "").trim().charAt(0).toUpperCase() || "?"}
-                </Text>
-              </View>
-            )}
+            <Avatar
+              uri={imageUri}
+              name={contactName}
+              size={120}
+              borderColor="#06c"
+              borderWidth={2}
+            />
           </View>
 
           <TouchableOpacity style={styles.photoButton} onPress={pickImage}>
@@ -277,28 +276,6 @@ const styles = StyleSheet.create({
   imagePreview: {
     alignItems: "center",
     marginBottom: 8,
-  },
-  image: {
-    width: 120,
-    height: 120,
-    borderRadius: 60,
-    borderWidth: 2,
-    borderColor: "#06c",
-  },
-  imagePlaceholder: {
-    width: 120,
-    height: 120,
-    borderRadius: 60,
-    borderWidth: 2,
-    borderColor: "#ddd",
-    backgroundColor: "#e9e9e9",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  imagePlaceholderText: {
-    fontSize: 36,
-    fontWeight: "700",
-    color: "#555",
   },
   photoButton: {
     backgroundColor: "#f0f0f0",
