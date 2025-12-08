@@ -9,6 +9,8 @@ import {
   TouchableOpacity,
   Image,
   ScrollView,
+  Keyboard,
+  TouchableWithoutFeedback,
 } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import * as ImagePicker from "expo-image-picker";
@@ -185,65 +187,70 @@ export default function ContactDetail() {
   }
 
   return (
-    <ScrollView
-      style={styles.scroll}
-      contentContainerStyle={styles.container}
-      keyboardShouldPersistTaps="handled"
-    >
-      <Text style={styles.title}>Edit Contact</Text>
+    <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
+      <ScrollView
+        style={styles.scroll}
+        contentContainerStyle={styles.container}
+        keyboardShouldPersistTaps="handled"
+      >
+        <Text style={styles.title}>Edit Contact</Text>
 
-      <View style={styles.form}>
-        <View style={styles.imagePreview}>
-          {imageUri ? (
-            <Image source={{ uri: imageUri }} style={styles.image} />
-          ) : (
-            <View style={styles.imagePlaceholder}>
-              <Text style={styles.imagePlaceholderText}>
-                {(contactName || "").trim().charAt(0).toUpperCase() || "?"}
-              </Text>
-            </View>
-          )}
-        </View>
+        <View style={styles.form}>
+          <View style={styles.imagePreview}>
+            {imageUri ? (
+              <Image source={{ uri: imageUri }} style={styles.image} />
+            ) : (
+              <View style={styles.imagePlaceholder}>
+                <Text style={styles.imagePlaceholderText}>
+                  {(contactName || "").trim().charAt(0).toUpperCase() || "?"}
+                </Text>
+              </View>
+            )}
+          </View>
 
-        <TouchableOpacity style={styles.photoButton} onPress={pickImage}>
-          <Text style={styles.photoButtonText}>
-            {imageUri ? "📷 Change Photo" : "📷 Add Photo"}
-          </Text>
-        </TouchableOpacity>
-
-        <Text style={styles.label}>Name</Text>
-        <TextInput
-          style={styles.input}
-          placeholder="Contact name"
-          value={contactName}
-          onChangeText={setContactName}
-          autoCapitalize="words"
-        />
-
-        <Text style={styles.label}>Phone Number</Text>
-        <TextInput
-          style={styles.input}
-          placeholder="Contact number"
-          value={contactNumber}
-          onChangeText={(text) => setContactNumber(formatPhone(text))}
-          keyboardType="phone-pad"
-        />
-
-        <View style={styles.buttonContainer}>
-          <Button title="Save Changes" onPress={saveChanges} />
-        </View>
-
-        <View style={styles.buttonContainer}>
-          <TouchableOpacity style={styles.deleteButton} onPress={deleteContact}>
-            <Text style={styles.deleteButtonText}>Delete Contact</Text>
+          <TouchableOpacity style={styles.photoButton} onPress={pickImage}>
+            <Text style={styles.photoButtonText}>
+              {imageUri ? "📷 Change Photo" : "📷 Add Photo"}
+            </Text>
           </TouchableOpacity>
-        </View>
 
-        <View style={styles.buttonContainer}>
-          <Button title="Cancel" onPress={() => router.back()} color="#666" />
+          <Text style={styles.label}>Name</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="Contact name"
+            value={contactName}
+            onChangeText={setContactName}
+            autoCapitalize="words"
+          />
+
+          <Text style={styles.label}>Phone Number</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="Contact number"
+            value={contactNumber}
+            onChangeText={(text) => setContactNumber(formatPhone(text))}
+            keyboardType="phone-pad"
+          />
+
+          <View style={styles.buttonContainer}>
+            <Button title="Save Changes" onPress={saveChanges} />
+          </View>
+
+          <View style={styles.buttonContainer}>
+            <TouchableOpacity
+              style={styles.deleteButton}
+              onPress={deleteContact}
+            >
+              <Text style={styles.deleteButtonText}>Delete Contact</Text>
+            </TouchableOpacity>
+          </View>
+
+          <View style={styles.buttonContainer}>
+            <Button title="Cancel" onPress={() => router.back()} color="#666" />
+          </View>
         </View>
-      </View>
-    </ScrollView>
+      </ScrollView>
+    </TouchableWithoutFeedback>
   );
 }
 

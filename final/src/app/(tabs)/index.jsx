@@ -9,6 +9,8 @@ import {
   StyleSheet,
   Image,
   Alert,
+  Keyboard,
+  TouchableWithoutFeedback,
 } from "react-native";
 import { useRouter } from "expo-router";
 import * as ImagePicker from "expo-image-picker";
@@ -128,76 +130,80 @@ export default function ContactsList() {
   };
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Your Contacts</Text>
+    <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
+      <View style={styles.container}>
+        <Text style={styles.title}>Your Contacts</Text>
 
-      {imageUri && (
-        <View style={styles.imagePreview}>
-          <Image source={{ uri: imageUri }} style={styles.image} />
-          <TouchableOpacity
-            style={styles.removeImage}
-            onPress={() => setImageUri(null)}
-          >
-            <Text style={styles.removeImageText}>✕</Text>
-          </TouchableOpacity>
+        {imageUri && (
+          <View style={styles.imagePreview}>
+            <Image source={{ uri: imageUri }} style={styles.image} />
+            <TouchableOpacity
+              style={styles.removeImage}
+              onPress={() => setImageUri(null)}
+            >
+              <Text style={styles.removeImageText}>✕</Text>
+            </TouchableOpacity>
+          </View>
+        )}
+
+        <View style={styles.row}>
+          <TextInput
+            style={[styles.input, { flex: 1 }]}
+            placeholder="contact name"
+            value={contactName}
+            onChangeText={setContactName}
+            autoCapitalize="words"
+          />
+          <TextInput
+            style={[styles.input, { flex: 1 }]}
+            placeholder="contact number"
+            value={contactNumber}
+            onChangeText={(text) => setContactNumber(formatPhone(text))}
+            keyboardType="phone-pad"
+          />
         </View>
-      )}
 
-      <View style={styles.row}>
-        <TextInput
-          style={[styles.input, { flex: 1 }]}
-          placeholder="contact name"
-          value={contactName}
-          onChangeText={setContactName}
-          autoCapitalize="words"
-        />
-        <TextInput
-          style={[styles.input, { flex: 1 }]}
-          placeholder="contact number"
-          value={contactNumber}
-          onChangeText={(text) => setContactNumber(formatPhone(text))}
-          keyboardType="phone-pad"
-        />
-      </View>
+        <View style={styles.buttonRow}>
+          <Button title="📷 Add Photo" onPress={pickImage} color="#666" />
+          <View style={{ width: 8 }} />
+          <Button title="Add Contact" onPress={addContact} />
+        </View>
 
-      <View style={styles.buttonRow}>
-        <Button title="📷 Add Photo" onPress={pickImage} color="#666" />
-        <View style={{ width: 8 }} />
-        <Button title="Add Contact" onPress={addContact} />
-      </View>
-
-      <FlatList
-        style={{ marginTop: 16 }}
-        data={items}
-        keyExtractor={(item) => item.id}
-        renderItem={({ item }) => (
-          <TouchableOpacity
-            style={styles.card}
-            onPress={() => router.push(`/(tabs)/contact-detail?id=${item.id}`)}
-          >
-            {item.imageUri ? (
-              <Image source={{ uri: item.imageUri }} style={styles.avatar} />
-            ) : (
-              <View style={styles.avatarPlaceholder}>
-                <Text style={styles.avatarPlaceholderText}>
-                  {(item.name || "").trim().charAt(0).toUpperCase() || "?"}
+        <FlatList
+          style={{ marginTop: 16 }}
+          data={items}
+          keyExtractor={(item) => item.id}
+          renderItem={({ item }) => (
+            <TouchableOpacity
+              style={styles.card}
+              onPress={() =>
+                router.push(`/(tabs)/contact-detail?id=${item.id}`)
+              }
+            >
+              {item.imageUri ? (
+                <Image source={{ uri: item.imageUri }} style={styles.avatar} />
+              ) : (
+                <View style={styles.avatarPlaceholder}>
+                  <Text style={styles.avatarPlaceholderText}>
+                    {(item.name || "").trim().charAt(0).toUpperCase() || "?"}
+                  </Text>
+                </View>
+              )}
+              <View style={styles.contactInfo}>
+                <Text style={styles.contact}>{item.name}</Text>
+                <Text style={styles.contactNumber}>
+                  {formatPhone(item.number || "")}
                 </Text>
               </View>
-            )}
-            <View style={styles.contactInfo}>
-              <Text style={styles.contact}>{item.name}</Text>
-              <Text style={styles.contactNumber}>
-                {formatPhone(item.number || "")}
-              </Text>
-            </View>
-            <Text style={styles.arrow}>→</Text>
-          </TouchableOpacity>
-        )}
-        ListEmptyComponent={
-          <Text style={styles.subtle}>No contacts yet. Add one above ↑</Text>
-        }
-      />
-    </View>
+              <Text style={styles.arrow}>→</Text>
+            </TouchableOpacity>
+          )}
+          ListEmptyComponent={
+            <Text style={styles.subtle}>No contacts yet. Add one above ↑</Text>
+          }
+        />
+      </View>
+    </TouchableWithoutFeedback>
   );
 }
 const styles = StyleSheet.create({
