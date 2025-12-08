@@ -27,12 +27,19 @@ const formatPhone = (value = "") => {
 };
 
 const digitsOnly = (value = "") => value.replace(/\D/g, "");
+const splitName = (name = "") => {
+  const parts = name.trim().split(" ");
+  if (!parts.length) return { first: "", last: "" };
+  const [first, ...rest] = parts;
+  return { first, last: rest.join(" ").trim() };
+};
 
 export default function ContactDetail() {
   const { id } = useLocalSearchParams();
   const router = useRouter();
   const { user } = useAuth();
-  const [contactName, setContactName] = useState("");
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
   const [contactNumber, setContactNumber] = useState("");
   const [imageUri, setImageUri] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -48,7 +55,10 @@ export default function ContactDetail() {
         if (docSnap.exists()) {
           const data = docSnap.data();
           if (data.ownerId === user.uid) {
-            setContactName(data.name || "");
+            const first = data.firstName || splitName(data.name || "").first;
+            const last = data.lastName || splitName(data.name || "").last;
+            setFirstName(first || "");
+            setLastName(last || "");
             setContactNumber(formatPhone(data.number || ""));
             setImageUri(data.imageUri || null);
           } else {
@@ -132,8 +142,12 @@ export default function ContactDetail() {
   };
 
   const saveChanges = async () => {
-    const trimmed = contactName.trim();
-    if (!trimmed || !user || !id) return;
+    const first = firstName.trim();
+    const last = lastName.trim();
+    if (!first || !last || !user || !id) {
+      Alert.alert("Missing info", "Please enter a first and last name.");
+      return;
+    }
 
     try {
       const digits = digitsOnly(contactNumber);
@@ -144,7 +158,9 @@ export default function ContactDetail() {
 
       const formattedNumber = formatPhone(digits);
       await updateDoc(doc(db, "contacts", id), {
-        name: trimmed,
+        firstName: first,
+        lastName: last,
+        name: `${first} ${last}`.trim(),
         number: formattedNumber,
         imageUri: imageUri || null,
       });
@@ -196,11 +212,11 @@ export default function ContactDetail() {
       >
         <Text style={styles.title}>Edit Contact</Text>
 
-        <View style={styles.form}>
+        <View style={styles.formCard}>
           <View style={styles.imagePreview}>
             <Avatar
               uri={imageUri}
-              name={contactName}
+              name={`${firstName} ${lastName}`}
               size={120}
               borderColor="#06c"
               borderWidth={2}
@@ -213,14 +229,28 @@ export default function ContactDetail() {
             </Text>
           </TouchableOpacity>
 
-          <Text style={styles.label}>Name</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="Contact name"
-            value={contactName}
-            onChangeText={setContactName}
-            autoCapitalize="words"
-          />
+          <View style={styles.row}>
+            <View style={{ flex: 1 }}>
+              <Text style={styles.label}>First Name</Text>
+              <TextInput
+                style={styles.input}
+                placeholder="First name"
+                value={firstName}
+                onChangeText={setFirstName}
+                autoCapitalize="words"
+              />
+            </View>
+            <View style={{ flex: 1 }}>
+              <Text style={styles.label}>Last Name</Text>
+              <TextInput
+                style={styles.input}
+                placeholder="Last name"
+                value={lastName}
+                onChangeText={setLastName}
+                autoCapitalize="words"
+              />
+            </View>
+          </View>
 
           <Text style={styles.label}>Phone Number</Text>
           <TextInput
@@ -270,12 +300,21 @@ const styles = StyleSheet.create({
     fontWeight: "700",
     marginBottom: 24,
   },
-  form: {
+  formCard: {
     gap: 16,
+    backgroundColor: "#f8f8f8",
+    borderRadius: 12,
+    padding: 16,
+    borderWidth: 1,
+    borderColor: "#eee",
   },
   imagePreview: {
     alignItems: "center",
     marginBottom: 8,
+  },
+  row: {
+    flexDirection: "row",
+    gap: 12,
   },
   photoButton: {
     backgroundColor: "#f0f0f0",

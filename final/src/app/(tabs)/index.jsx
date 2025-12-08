@@ -35,11 +35,20 @@ const formatPhone = (value = "") => {
 };
 
 const digitsOnly = (value = "") => value.replace(/\D/g, "");
+const getDisplayName = (item = {}) => {
+  const first = (item.firstName || "").trim();
+  const last = (item.lastName || "").trim();
+  const combined = `${first} ${last}`.trim();
+  if (combined) return combined;
+  if (item.name) return item.name;
+  return "Unnamed";
+};
 
 export default function ContactsList() {
   const router = useRouter();
   const { user } = useAuth();
-  const [contactName, setContactName] = useState("");
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
   const [contactNumber, setContactNumber] = useState("");
   const [imageUri, setImageUri] = useState(null);
   const [items, setItems] = useState([]);
@@ -106,8 +115,12 @@ export default function ContactsList() {
   };
 
   const addContact = async () => {
-    const trimmed = contactName.trim();
-    if (!trimmed || !user) return;
+    const first = firstName.trim();
+    const last = lastName.trim();
+    if (!first || !last || !user) {
+      Alert.alert("Missing info", "Please enter a first and last name.");
+      return;
+    }
 
     const digits = digitsOnly(contactNumber);
     if (digits.length !== 10) {
@@ -116,16 +129,20 @@ export default function ContactsList() {
     }
 
     const formattedNumber = formatPhone(digits);
+    const fullName = `${first} ${last}`.trim();
 
     await addDoc(collection(db, "contacts"), {
-      name: trimmed,
+      firstName: first,
+      lastName: last,
+      name: fullName, // backward compatible display field
       number: formattedNumber,
       imageUri: imageUri || null,
       ownerId: user.uid,
       createdAt: serverTimestamp(),
     });
 
-    setContactName("");
+    setFirstName("");
+    setLastName("");
     setContactNumber("");
     setImageUri(null);
   };
@@ -147,27 +164,37 @@ export default function ContactsList() {
           </View>
         )}
 
-        <View style={styles.row}>
+        <View style={styles.formCard}>
+          <View style={styles.row}>
+            <TextInput
+              style={[styles.input, { flex: 1 }]}
+              placeholder="first name"
+              value={firstName}
+              onChangeText={setFirstName}
+              autoCapitalize="words"
+            />
+            <TextInput
+              style={[styles.input, { flex: 1 }]}
+              placeholder="last name"
+              value={lastName}
+              onChangeText={setLastName}
+              autoCapitalize="words"
+            />
+          </View>
+
           <TextInput
-            style={[styles.input, { flex: 1 }]}
-            placeholder="contact name"
-            value={contactName}
-            onChangeText={setContactName}
-            autoCapitalize="words"
-          />
-          <TextInput
-            style={[styles.input, { flex: 1 }]}
-            placeholder="contact number"
+            style={[styles.input, { marginTop: 8 }]}
+            placeholder="phone number"
             value={contactNumber}
             onChangeText={(text) => setContactNumber(formatPhone(text))}
             keyboardType="phone-pad"
           />
-        </View>
 
-        <View style={styles.buttonRow}>
-          <Button title="📷 Add Photo" onPress={pickImage} color="#666" />
-          <View style={{ width: 8 }} />
-          <Button title="Add Contact" onPress={addContact} />
+          <View style={styles.buttonRow}>
+            <Button title="📷 Add Photo" onPress={pickImage} color="#666" />
+            <View style={{ width: 8 }} />
+            <Button title="Add Contact" onPress={addContact} />
+          </View>
         </View>
 
         <FlatList
@@ -183,13 +210,13 @@ export default function ContactsList() {
             >
               <Avatar
                 uri={item.imageUri}
-                name={item.name}
+                name={getDisplayName(item)}
                 size={50}
                 borderColor="#ddd"
                 borderWidth={1}
               />
               <View style={styles.contactInfo}>
-                <Text style={styles.contact}>{item.name}</Text>
+                <Text style={styles.contact}>{getDisplayName(item)}</Text>
                 <Text style={styles.contactNumber}>
                   {formatPhone(item.number || "")}
                 </Text>
@@ -210,7 +237,15 @@ const styles = StyleSheet.create({
   title: { fontSize: 24, fontWeight: "700", marginBottom: 8 },
   input: { borderWidth: 1, borderColor: "#ccc", padding: 10, borderRadius: 8 },
   row: { flexDirection: "row", alignItems: "center", marginTop: 8, gap: 8 },
-  buttonRow: { flexDirection: "row", alignItems: "center", marginTop: 8 },
+  buttonRow: { flexDirection: "row", alignItems: "center", marginTop: 12 },
+  formCard: {
+    backgroundColor: "#f8f8f8",
+    borderRadius: 12,
+    padding: 12,
+    marginTop: 8,
+    borderWidth: 1,
+    borderColor: "#eee",
+  },
   subtle: { color: "#666", marginTop: 8 },
   imagePreview: {
     alignItems: "center",
