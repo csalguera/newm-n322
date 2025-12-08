@@ -5,7 +5,6 @@ import {
   StyleSheet,
   TextInput,
   TouchableOpacity,
-  Alert,
   ScrollView,
   KeyboardAvoidingView,
   Platform,
@@ -17,6 +16,7 @@ import {
 } from "firebase/auth";
 import { useAuth } from "../../auth/AuthContext";
 import { colors, spacing, borderRadius, typography } from "../../styles/theme";
+import { showAlert } from "../../utils/alertUtils";
 
 const Settings = () => {
   const { user, signOut } = useAuth();
@@ -28,22 +28,38 @@ const Settings = () => {
 
   const handlePasswordChange = async () => {
     if (!currentPassword.trim()) {
-      Alert.alert("Error", "Please enter your current password.");
+      showAlert({
+        title: "Error",
+        message: "Please enter your current password.",
+        type: "error",
+      });
       return;
     }
 
     if (!newPassword.trim()) {
-      Alert.alert("Error", "Please enter a new password.");
+      showAlert({
+        title: "Error",
+        message: "Please enter a new password.",
+        type: "error",
+      });
       return;
     }
 
     if (newPassword.length < 6) {
-      Alert.alert("Error", "New password must be at least 6 characters.");
+      showAlert({
+        title: "Error",
+        message: "New password must be at least 6 characters.",
+        type: "error",
+      });
       return;
     }
 
     if (newPassword !== confirmPassword) {
-      Alert.alert("Error", "New password and confirmation do not match.");
+      showAlert({
+        title: "Error",
+        message: "New password and confirmation do not match.",
+        type: "error",
+      });
       return;
     }
 
@@ -58,13 +74,21 @@ const Settings = () => {
 
       // Update to new password
       await updatePassword(user, newPassword);
-      Alert.alert("Success", "Password updated successfully!");
+      showAlert({
+        title: "Success",
+        message: "Password updated successfully!",
+        type: "success",
+      });
       setCurrentPassword("");
       setNewPassword("");
       setConfirmPassword("");
       setShowPasswordForm(false);
     } catch (error) {
-      Alert.alert("Error", error.message || "Failed to update password.");
+      showAlert({
+        title: "Error",
+        message: error.message || "Failed to update password.",
+        type: "error",
+      });
     } finally {
       setLoading(false);
     }

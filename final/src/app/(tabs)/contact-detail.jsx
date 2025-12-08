@@ -4,13 +4,14 @@ import {
   Text,
   TextInput,
   StyleSheet,
-  Alert,
   TouchableOpacity,
   ScrollView,
   Keyboard,
   TouchableWithoutFeedback,
+  Alert,
 } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
+import { useActionSheet } from "@expo/react-native-action-sheet";
 import * as ImagePicker from "expo-image-picker";
 import { useAuth } from "../../auth/AuthContext";
 import { db } from "../../firebase/firebaseConfig";
@@ -19,11 +20,13 @@ import ContactDetailForm from "../../components/ContactDetailForm";
 import { colors, spacing, borderRadius, typography } from "../../styles/theme";
 import { formatPhoneNumber, isValidPhoneNumber } from "../../utils/phoneUtils";
 import { splitFullName } from "../../utils/contactUtils";
+import { showAlert, showConfirm } from "../../utils/alertUtils";
 
 export default function ContactDetail() {
   const { id } = useLocalSearchParams();
   const router = useRouter();
   const { user } = useAuth();
+  const { showActionSheetWithOptions } = useActionSheet();
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [contactNumber, setContactNumber] = useState("");
@@ -49,19 +52,28 @@ export default function ContactDetail() {
             setContactNumber(formatPhoneNumber(data.number || ""));
             setImageUri(data.imageUri || null);
           } else {
-            Alert.alert(
-              "Error",
-              "You don't have permission to view this contact"
-            );
+            showAlert({
+              title: "Error",
+              message: "You don't have permission to view this contact",
+              type: "error",
+            });
             router.back();
           }
         } else {
-          Alert.alert("Error", "Contact not found");
+          showAlert({
+            title: "Error",
+            message: "Contact not found",
+            type: "error",
+          });
           router.back();
         }
       } catch (error) {
         console.error("Error fetching contact:", error);
-        Alert.alert("Error", "Failed to load contact");
+        showAlert({
+          title: "Error",
+          message: "Failed to load contact",
+          type: "error",
+        });
       } finally {
         setLoading(false);
       }
@@ -70,61 +82,79 @@ export default function ContactDetail() {
     fetchContact();
   }, [user?.uid, id]);
 
-  const pickImage = async () => {
-    Alert.alert(
-      "Select Image",
-      "Choose an option",
-      [
-        {
-          text: "Take Photo",
-          onPress: async () => {
-            const { status } =
-              await ImagePicker.requestCameraPermissionsAsync();
-            if (status !== "granted") {
-              Alert.alert("Permission needed", "Camera permission is required");
-              return;
-            }
-            const result = await ImagePicker.launchCameraAsync({
-              mediaTypes: ImagePicker.MediaTypeOptions.Images,
-              allowsEditing: true,
-              aspect: [1, 1],
-              quality: 0.5,
-            });
-            if (!result.canceled) {
-              setImageUri(result.assets[0].uri);
-            }
-          },
+  const takePhoto = async () => {
+    const { status } = await ImagePicker.requestCameraPermissionsAsync();
+    if (status !== "granted") {
+      Alert.alert("Permission needed", "Camera permission is required");
+      return;
+    }
+    const result = await ImagePicker.launchCameraAsync({
+      mediaTypes: ["images"],
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 0.5,
+    });
+    if (!result.canceled) {
+      setImageUri(result.assets[0].uri);
+    }
+  };
+
+  const chooseFromLibrary = async () => {
+    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (status !== "granted") {
+      Alert.alert("Permission needed", "Photo library permission is required");
+      return;
+    }
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ["images"],
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 0.5,
+    });
+    if (!result.canceled) {
+      setImageUri(result.assets[0].uri);
+    }
+  };
+
+  const pickImage = () => {
+    const options = ["Take Photo", "Choose from Library", "Cancel"];
+    const cancelButtonIndex = 2;
+
+    showActionSheetWithOptions(
+      {
+        options,
+        cancelButtonIndex,
+        title: "Select Image",
+        message: "Choose an option",
+        textStyle: {
+          fontSize: typography.body.fontSize,
+          color: colors.textPrimary,
         },
-        {
-          text: "Choose from Library",
-          onPress: async () => {
-            const { status } =
-              await ImagePicker.requestMediaLibraryPermissionsAsync();
-            if (status !== "granted") {
-              Alert.alert(
-                "Permission needed",
-                "Photo library permission is required"
-              );
-              return;
-            }
-            const result = await ImagePicker.launchImageLibraryAsync({
-              mediaTypes: ImagePicker.MediaTypeOptions.Images,
-              allowsEditing: true,
-              aspect: [1, 1],
-              quality: 0.5,
-            });
-            if (!result.canceled) {
-              setImageUri(result.assets[0].uri);
-            }
-          },
+        titleTextStyle: {
+          fontSize: typography.h4.fontSize,
+          fontWeight: typography.h4.fontWeight,
+          color: colors.textPrimary,
         },
-        imageUri && {
-          text: "Remove Photo",
-          style: "destructive",
-          onPress: () => setImageUri(null),
+        messageTextStyle: {
+          fontSize: typography.bodySm.fontSize,
+          color: colors.textSecondary,
         },
-        { text: "Cancel", style: "cancel" },
-      ].filter(Boolean)
+        containerStyle: {
+          borderTopLeftRadius: borderRadius.lg,
+          borderTopRightRadius: borderRadius.lg,
+          paddingBottom: spacing.lg,
+        },
+        separatorStyle: {
+          backgroundColor: colors.border,
+        },
+      },
+      (selectedIndex) => {
+        if (selectedIndex === 0) {
+          takePhoto();
+        } else if (selectedIndex === 1) {
+          chooseFromLibrary();
+        }
+      }
     );
   };
 
@@ -132,12 +162,20 @@ export default function ContactDetail() {
     const first = firstName.trim();
     const last = lastName.trim();
     if (!first || !last || !user || !id) {
-      Alert.alert("Missing info", "Please enter a first and last name.");
+      showAlert({
+        title: "Missing info",
+        message: "Please enter a first and last name.",
+        type: "error",
+      });
       return;
     }
 
     if (!isValidPhoneNumber(contactNumber)) {
-      Alert.alert("Invalid number", "Please enter a 10-digit phone number.");
+      showAlert({
+        title: "Invalid number",
+        message: "Please enter a 10-digit phone number.",
+        type: "error",
+      });
       return;
     }
 
@@ -150,35 +188,42 @@ export default function ContactDetail() {
         number: formattedNumber,
         imageUri: imageUri || null,
       });
-      Alert.alert("Success", "Contact updated successfully");
+      showAlert({
+        title: "Success",
+        message: "Contact updated successfully",
+        type: "success",
+      });
       router.back();
     } catch (error) {
       console.error("Error updating contact:", error);
-      Alert.alert("Error", "Failed to update contact");
+      showAlert({
+        title: "Error",
+        message: "Failed to update contact",
+        type: "error",
+      });
     }
   };
 
   const deleteContact = () => {
-    Alert.alert(
-      "Delete Contact",
-      "Are you sure you want to delete this contact?",
-      [
-        { text: "Cancel", style: "cancel" },
-        {
-          text: "Delete",
-          style: "destructive",
-          onPress: async () => {
-            try {
-              await deleteDoc(doc(db, "contacts", id));
-              router.back();
-            } catch (error) {
-              console.error("Error deleting contact:", error);
-              Alert.alert("Error", "Failed to delete contact");
-            }
-          },
-        },
-      ]
-    );
+    showConfirm({
+      title: "Delete Contact",
+      message: "Are you sure you want to delete this contact?",
+      cancelLabel: "Cancel",
+      confirmLabel: "Delete",
+      onConfirm: async () => {
+        try {
+          await deleteDoc(doc(db, "contacts", id));
+          router.back();
+        } catch (error) {
+          console.error("Error deleting contact:", error);
+          showAlert({
+            title: "Error",
+            message: "Failed to delete contact",
+            type: "error",
+          });
+        }
+      },
+    });
   };
 
   if (loading) {

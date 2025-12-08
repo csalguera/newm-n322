@@ -5,11 +5,12 @@ import {
   FlatList,
   TouchableOpacity,
   StyleSheet,
-  Alert,
   Keyboard,
   TouchableWithoutFeedback,
+  Alert,
 } from "react-native";
 import { useRouter } from "expo-router";
+import { useActionSheet } from "@expo/react-native-action-sheet";
 import * as ImagePicker from "expo-image-picker";
 import { useAuth } from "../../auth/AuthContext";
 import { db } from "../../firebase/firebaseConfig";
@@ -27,10 +28,12 @@ import ContactListItem from "../../components/ContactListItem";
 import { colors, spacing, borderRadius, typography } from "../../styles/theme";
 import { formatPhoneNumber, isValidPhoneNumber } from "../../utils/phoneUtils";
 import { getContactDisplayName } from "../../utils/contactUtils";
+import { showAlert, showConfirm } from "../../utils/alertUtils";
 
 export default function ContactsScreen() {
   const router = useRouter();
   const { user } = useAuth();
+  const { showActionSheetWithOptions } = useActionSheet();
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [contactNumber, setContactNumber] = useState("");
@@ -57,64 +60,100 @@ export default function ContactsScreen() {
     return unsub;
   }, [user?.uid]);
 
-  const pickImage = async () => {
-    Alert.alert("Select Image", "Choose an option", [
+  const takePhoto = async () => {
+    const { status } = await ImagePicker.requestCameraPermissionsAsync();
+    if (status !== "granted") {
+      Alert.alert("Permission needed", "Camera permission is required");
+      return;
+    }
+    const result = await ImagePicker.launchCameraAsync({
+      mediaTypes: ["images"],
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 0.5,
+    });
+    if (!result.canceled) {
+      setImageUri(result.assets[0].uri);
+    }
+  };
+
+  const chooseFromLibrary = async () => {
+    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (status !== "granted") {
+      Alert.alert("Permission needed", "Photo library permission is required");
+      return;
+    }
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ["images"],
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 0.5,
+    });
+    if (!result.canceled) {
+      setImageUri(result.assets[0].uri);
+    }
+  };
+
+  const pickImage = () => {
+    const options = ["Take Photo", "Choose from Library", "Cancel"];
+    const cancelButtonIndex = 2;
+
+    showActionSheetWithOptions(
       {
-        text: "Take Photo",
-        onPress: async () => {
-          const { status } = await ImagePicker.requestCameraPermissionsAsync();
-          if (status !== "granted") {
-            Alert.alert("Permission needed", "Camera permission is required");
-            return;
-          }
-          const result = await ImagePicker.launchCameraAsync({
-            mediaTypes: ImagePicker.MediaTypeOptions.Images,
-            allowsEditing: true,
-            aspect: [1, 1],
-            quality: 0.5,
-          });
-          if (!result.canceled) {
-            setImageUri(result.assets[0].uri);
-          }
+        options,
+        cancelButtonIndex,
+        title: "Select Image",
+        message: "Choose an option",
+        textStyle: {
+          fontSize: typography.body.fontSize,
+          color: colors.textPrimary,
+        },
+        titleTextStyle: {
+          fontSize: typography.h4.fontSize,
+          fontWeight: typography.h4.fontWeight,
+          color: colors.textPrimary,
+        },
+        messageTextStyle: {
+          fontSize: typography.bodySm.fontSize,
+          color: colors.textSecondary,
+        },
+        containerStyle: {
+          borderTopLeftRadius: borderRadius.lg,
+          borderTopRightRadius: borderRadius.lg,
+          paddingBottom: spacing.lg,
+        },
+        separatorStyle: {
+          backgroundColor: colors.border,
         },
       },
-      {
-        text: "Choose from Library",
-        onPress: async () => {
-          const { status } =
-            await ImagePicker.requestMediaLibraryPermissionsAsync();
-          if (status !== "granted") {
-            Alert.alert(
-              "Permission needed",
-              "Photo library permission is required"
-            );
-            return;
-          }
-          const result = await ImagePicker.launchImageLibraryAsync({
-            mediaTypes: ImagePicker.MediaTypeOptions.Images,
-            allowsEditing: true,
-            aspect: [1, 1],
-            quality: 0.5,
-          });
-          if (!result.canceled) {
-            setImageUri(result.assets[0].uri);
-          }
-        },
-      },
-      { text: "Cancel", style: "cancel" },
-    ]);
+      (selectedIndex) => {
+        if (selectedIndex === 0) {
+          takePhoto();
+        } else if (selectedIndex === 1) {
+          chooseFromLibrary();
+        }
+      }
+    );
   };
 
   const addContact = async () => {
     const first = firstName.trim();
     const last = lastName.trim();
     if (!first || !last || !user) {
-      Alert.alert("Missing info", "Please enter a first and last name.");
+      showAlert({
+        title: "Missing info",
+        message: "Please enter a first and last name.",
+        type: "error",
+      });
       return;
     }
 
     if (!isValidPhoneNumber(contactNumber)) {
-      Alert.alert("Invalid number", "Please enter a 10-digit phone number.");
+      showAlert({
+        title: "Invalid number",
+        message: "Please enter a 10-digit phone number.",
+        type: "error",
+      });
       return;
     }
 
