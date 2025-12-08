@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "expo": "~54.0.20",
+    "expo-image-picker": "~17.0.9",
     "expo-router": "~6.0.13",
     "expo-status-bar": "~3.0.8",
     "firebase": "^12.4.0",

@@ -11,7 +11,7 @@ const TabsLayout = () => {
       <Tabs.Screen 
         name="contact-detail" 
         options={{ 
-          href: null, // Hide from tabs
+          href: null,
           title: "Contact Details" 
         }} 
       />

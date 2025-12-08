@@ -7,8 +7,10 @@ import {
   StyleSheet,
   Alert,
   TouchableOpacity,
+  Image,
 } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
+import * as ImagePicker from "expo-image-picker";
 import { useAuth } from "../../auth/AuthContext";
 import { db } from "../../firebase/firebaseConfig";
 import { doc, getDoc, updateDoc, deleteDoc } from "firebase/firestore";
@@ -19,6 +21,7 @@ export default function ContactDetail() {
   const { user } = useAuth();
   const [contactName, setContactName] = useState("");
   const [contactNumber, setContactNumber] = useState("");
+  const [imageUri, setImageUri] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -31,10 +34,10 @@ export default function ContactDetail() {
 
         if (docSnap.exists()) {
           const data = docSnap.data();
-          // Verify ownership
           if (data.ownerId === user.uid) {
             setContactName(data.name || "");
             setContactNumber(data.number || "");
+            setImageUri(data.imageUri || null);
           } else {
             Alert.alert(
               "Error",
@@ -57,6 +60,64 @@ export default function ContactDetail() {
     fetchContact();
   }, [user?.uid, id]);
 
+  const pickImage = async () => {
+    Alert.alert(
+      "Select Image",
+      "Choose an option",
+      [
+        {
+          text: "Take Photo",
+          onPress: async () => {
+            const { status } =
+              await ImagePicker.requestCameraPermissionsAsync();
+            if (status !== "granted") {
+              Alert.alert("Permission needed", "Camera permission is required");
+              return;
+            }
+            const result = await ImagePicker.launchCameraAsync({
+              mediaTypes: ImagePicker.MediaTypeOptions.Images,
+              allowsEditing: true,
+              aspect: [1, 1],
+              quality: 0.5,
+            });
+            if (!result.canceled) {
+              setImageUri(result.assets[0].uri);
+            }
+          },
+        },
+        {
+          text: "Choose from Library",
+          onPress: async () => {
+            const { status } =
+              await ImagePicker.requestMediaLibraryPermissionsAsync();
+            if (status !== "granted") {
+              Alert.alert(
+                "Permission needed",
+                "Photo library permission is required"
+              );
+              return;
+            }
+            const result = await ImagePicker.launchImageLibraryAsync({
+              mediaTypes: ImagePicker.MediaTypeOptions.Images,
+              allowsEditing: true,
+              aspect: [1, 1],
+              quality: 0.5,
+            });
+            if (!result.canceled) {
+              setImageUri(result.assets[0].uri);
+            }
+          },
+        },
+        imageUri && {
+          text: "Remove Photo",
+          style: "destructive",
+          onPress: () => setImageUri(null),
+        },
+        { text: "Cancel", style: "cancel" },
+      ].filter(Boolean)
+    );
+  };
+
   const saveChanges = async () => {
     const trimmed = contactName.trim();
     if (!trimmed || !user || !id) return;
@@ -65,6 +126,7 @@ export default function ContactDetail() {
       await updateDoc(doc(db, "contacts", id), {
         name: trimmed,
         number: contactNumber,
+        imageUri: imageUri || null,
       });
       Alert.alert("Success", "Contact updated successfully");
       router.back();
@@ -110,6 +172,18 @@ export default function ContactDetail() {
       <Text style={styles.title}>Edit Contact</Text>
 
       <View style={styles.form}>
+        {imageUri && (
+          <View style={styles.imagePreview}>
+            <Image source={{ uri: imageUri }} style={styles.image} />
+          </View>
+        )}
+
+        <TouchableOpacity style={styles.photoButton} onPress={pickImage}>
+          <Text style={styles.photoButtonText}>
+            {imageUri ? "📷 Change Photo" : "📷 Add Photo"}
+          </Text>
+        </TouchableOpacity>
+
         <Text style={styles.label}>Name</Text>
         <TextInput
           style={styles.input}
@@ -160,6 +234,30 @@ const styles = StyleSheet.create({
   },
   form: {
     gap: 16,
+  },
+  imagePreview: {
+    alignItems: "center",
+    marginBottom: 8,
+  },
+  image: {
+    width: 120,
+    height: 120,
+    borderRadius: 60,
+    borderWidth: 2,
+    borderColor: "#06c",
+  },
+  photoButton: {
+    backgroundColor: "#f0f0f0",
+    padding: 12,
+    borderRadius: 8,
+    alignItems: "center",
+    borderWidth: 1,
+    borderColor: "#ddd",
+  },
+  photoButtonText: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: "#333",
   },
   label: {
     fontSize: 16,
