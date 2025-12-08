@@ -8,6 +8,13 @@ const TabsLayout = () => {
     <Tabs screenOptions={{ headerTitleAlign: "center" }}>
       <Tabs.Screen name="index" options={{ title: "Contacts" }} />
       <Tabs.Screen name="settings" options={{ title: "Settings" }} />
+      <Tabs.Screen 
+        name="contact-detail" 
+        options={{ 
+          href: null, // Hide from tabs
+          title: "Contact Details" 
+        }} 
+      />
     </Tabs>
   );
 };

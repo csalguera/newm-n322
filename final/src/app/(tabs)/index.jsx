@@ -8,6 +8,7 @@ import {
   TouchableOpacity,
   StyleSheet,
 } from "react-native";
+import { useRouter } from "expo-router";
 import { useAuth } from "../../auth/AuthContext";
 import { db } from "../../firebase/firebaseConfig";
 import {
@@ -17,17 +18,14 @@ import {
   query,
   where,
   orderBy,
-  updateDoc,
-  deleteDoc,
-  doc,
   serverTimestamp,
 } from "firebase/firestore";
 
 export default function ContactsList() {
+  const router = useRouter();
   const { user } = useAuth();
   const [contactName, setContactName] = useState("");
   const [contactNumber, setContactNumber] = useState("");
-  const [editingId, setEditingId] = useState(null);
   const [items, setItems] = useState([]);
 
   useEffect(() => {
@@ -43,40 +41,19 @@ export default function ContactsList() {
     return unsub;
   }, [user?.uid]);
 
-  const addOrSave = async () => {
+  const addContact = async () => {
     const trimmed = contactName.trim();
     if (!trimmed || !user) return;
-    if (editingId) {
-      await updateDoc(doc(db, "contacts", editingId), {
-        name: trimmed,
-        number: contactNumber,
-      });
-      setEditingId(null);
-    } else {
-      await addDoc(collection(db, "contacts"), {
-        name: trimmed,
-        number: contactNumber,
-        ownerId: user.uid,
-        createdAt: serverTimestamp(),
-      });
-    }
+
+    await addDoc(collection(db, "contacts"), {
+      name: trimmed,
+      number: contactNumber,
+      ownerId: user.uid,
+      createdAt: serverTimestamp(),
+    });
+
     setContactName("");
     setContactNumber("");
-  };
-
-  const startEdit = (item) => {
-    setEditingId(item.id);
-    setContactName(item.name);
-    setContactNumber(item.number);
-  };
-
-  const remove = async (id) => {
-    await deleteDoc(doc(db, "contacts", id));
-    if (editingId === id) {
-      setEditingId(null);
-      setContactName("");
-      setContactNumber("");
-    }
   };
 
   return (
@@ -88,17 +65,17 @@ export default function ContactsList() {
           placeholder="contact name"
           value={contactName}
           onChangeText={setContactName}
-          autoCapitalize="none"
+          autoCapitalize="words"
         />
         <TextInput
           style={[styles.input, { flex: 1 }]}
           placeholder="contact number"
           value={contactNumber}
           onChangeText={setContactNumber}
-          autoCapitalize="none"
+          keyboardType="phone-pad"
         />
         <View style={{ width: 8 }} />
-        <Button title={editingId ? "Save" : "Add"} onPress={addOrSave} />
+        <Button title="Add" onPress={addContact} />
       </View>
 
       <FlatList
@@ -106,22 +83,19 @@ export default function ContactsList() {
         data={items}
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => (
-          <View style={styles.card}>
-            <Text style={styles.contact}>{item.name}</Text>
-            <Text style={styles.contact}>{item.number}</Text>
-            <View style={styles.cardButtons}>
-              <TouchableOpacity onPress={() => startEdit(item)}>
-                <Text style={styles.link}>Edit</Text>
-              </TouchableOpacity>
-              <Text style={{ marginHorizontal: 8 }}>|</Text>
-              <TouchableOpacity onPress={() => remove(item.id)}>
-                <Text style={[styles.link, { color: "#c00" }]}>Delete</Text>
-              </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.card}
+            onPress={() => router.push(`/(tabs)/contact-detail?id=${item.id}`)}
+          >
+            <View style={styles.contactInfo}>
+              <Text style={styles.contact}>{item.name}</Text>
+              <Text style={styles.contactNumber}>{item.number}</Text>
             </View>
-          </View>
+            <Text style={styles.arrow}>→</Text>
+          </TouchableOpacity>
         )}
         ListEmptyComponent={
-          <Text style={styles.subtle}>No contacts yet. Add one ↑</Text>
+          <Text style={styles.subtle}>No contacts yet. Add one above ↑</Text>
         }
       />
     </View>
@@ -134,7 +108,7 @@ const styles = StyleSheet.create({
   row: { flexDirection: "row", alignItems: "center", marginTop: 8 },
   subtle: { color: "#666", marginTop: 8 },
   card: {
-    padding: 12,
+    padding: 16,
     borderWidth: 1,
     borderColor: "#eee",
     borderRadius: 10,
@@ -142,8 +116,12 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
+    backgroundColor: "#fafafa",
   },
-  contact: { fontSize: 18, fontWeight: "600" },
-  cardButtons: { flexDirection: "row", alignItems: "center" },
-  link: { fontSize: 16, color: "#06c" },
+  contactInfo: {
+    flex: 1,
+  },
+  contact: { fontSize: 18, fontWeight: "600", marginBottom: 4 },
+  contactNumber: { fontSize: 16, color: "#666" },
+  arrow: { fontSize: 24, color: "#06c", marginLeft: 12 },
 });
