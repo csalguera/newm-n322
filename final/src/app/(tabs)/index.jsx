@@ -24,6 +24,15 @@ import {
   serverTimestamp,
 } from "firebase/firestore";
 
+const formatPhone = (value = "") => {
+  const digits = value.replace(/\D/g, "").slice(0, 10);
+  if (digits.length <= 3) return digits;
+  if (digits.length <= 6) return `(${digits.slice(0, 3)}) ${digits.slice(3)}`;
+  return `(${digits.slice(0, 3)}) ${digits.slice(3, 6)}-${digits.slice(6)}`;
+};
+
+const digitsOnly = (value = "") => value.replace(/\D/g, "");
+
 export default function ContactsList() {
   const router = useRouter();
   const { user } = useAuth();
@@ -97,9 +106,17 @@ export default function ContactsList() {
     const trimmed = contactName.trim();
     if (!trimmed || !user) return;
 
+    const digits = digitsOnly(contactNumber);
+    if (digits.length !== 10) {
+      Alert.alert("Invalid number", "Please enter a 10-digit phone number.");
+      return;
+    }
+
+    const formattedNumber = formatPhone(digits);
+
     await addDoc(collection(db, "contacts"), {
       name: trimmed,
-      number: contactNumber,
+      number: formattedNumber,
       imageUri: imageUri || null,
       ownerId: user.uid,
       createdAt: serverTimestamp(),
@@ -138,7 +155,7 @@ export default function ContactsList() {
           style={[styles.input, { flex: 1 }]}
           placeholder="contact number"
           value={contactNumber}
-          onChangeText={setContactNumber}
+          onChangeText={(text) => setContactNumber(formatPhone(text))}
           keyboardType="phone-pad"
         />
       </View>
@@ -163,7 +180,9 @@ export default function ContactsList() {
             )}
             <View style={styles.contactInfo}>
               <Text style={styles.contact}>{item.name}</Text>
-              <Text style={styles.contactNumber}>{item.number}</Text>
+              <Text style={styles.contactNumber}>
+                {formatPhone(item.number || "")}
+              </Text>
             </View>
             <Text style={styles.arrow}>→</Text>
           </TouchableOpacity>

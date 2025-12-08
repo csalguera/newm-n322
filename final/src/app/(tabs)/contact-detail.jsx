@@ -16,6 +16,15 @@ import { useAuth } from "../../auth/AuthContext";
 import { db } from "../../firebase/firebaseConfig";
 import { doc, getDoc, updateDoc, deleteDoc } from "firebase/firestore";
 
+const formatPhone = (value = "") => {
+  const digits = value.replace(/\D/g, "").slice(0, 10);
+  if (digits.length <= 3) return digits;
+  if (digits.length <= 6) return `(${digits.slice(0, 3)}) ${digits.slice(3)}`;
+  return `(${digits.slice(0, 3)}) ${digits.slice(3, 6)}-${digits.slice(6)}`;
+};
+
+const digitsOnly = (value = "") => value.replace(/\D/g, "");
+
 export default function ContactDetail() {
   const { id } = useLocalSearchParams();
   const router = useRouter();
@@ -37,7 +46,7 @@ export default function ContactDetail() {
           const data = docSnap.data();
           if (data.ownerId === user.uid) {
             setContactName(data.name || "");
-            setContactNumber(data.number || "");
+            setContactNumber(formatPhone(data.number || ""));
             setImageUri(data.imageUri || null);
           } else {
             Alert.alert(
@@ -124,9 +133,16 @@ export default function ContactDetail() {
     if (!trimmed || !user || !id) return;
 
     try {
+      const digits = digitsOnly(contactNumber);
+      if (digits.length !== 10) {
+        Alert.alert("Invalid number", "Please enter a 10-digit phone number.");
+        return;
+      }
+
+      const formattedNumber = formatPhone(digits);
       await updateDoc(doc(db, "contacts", id), {
         name: trimmed,
-        number: contactNumber,
+        number: formattedNumber,
         imageUri: imageUri || null,
       });
       Alert.alert("Success", "Contact updated successfully");
@@ -203,7 +219,7 @@ export default function ContactDetail() {
           style={styles.input}
           placeholder="Contact number"
           value={contactNumber}
-          onChangeText={setContactNumber}
+          onChangeText={(text) => setContactNumber(formatPhone(text))}
           keyboardType="phone-pad"
         />
 
