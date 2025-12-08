@@ -154,7 +154,7 @@ const styles = StyleSheet.create({
     flexGrow: 1,
     justifyContent: "center",
     paddingHorizontal: spacing.lg,
-    paddingVertical: spacing.xl,
+    paddingVertical: spacing.xl + spacing.lg,
   },
   header: {
     marginBottom: spacing.xxl,

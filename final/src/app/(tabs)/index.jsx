@@ -221,7 +221,7 @@ const styles = StyleSheet.create({
   },
   header: {
     paddingHorizontal: spacing.lg,
-    paddingTop: spacing.xl + spacing.lg,
+    paddingTop: spacing.xl + spacing.xl,
     paddingBottom: spacing.lg,
     backgroundColor: colors.white,
     borderBottomWidth: 1,
