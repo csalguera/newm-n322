@@ -175,8 +175,14 @@ export default function ContactsList() {
             style={styles.card}
             onPress={() => router.push(`/(tabs)/contact-detail?id=${item.id}`)}
           >
-            {item.imageUri && (
+            {item.imageUri ? (
               <Image source={{ uri: item.imageUri }} style={styles.avatar} />
+            ) : (
+              <View style={styles.avatarPlaceholder}>
+                <Text style={styles.avatarPlaceholderText}>
+                  {(item.name || "").trim().charAt(0).toUpperCase() || "?"}
+                </Text>
+              </View>
             )}
             <View style={styles.contactInfo}>
               <Text style={styles.contact}>{item.name}</Text>
@@ -236,6 +242,22 @@ const styles = StyleSheet.create({
     marginRight: 12,
     borderWidth: 1,
     borderColor: "#ddd",
+  },
+  avatarPlaceholder: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    marginRight: 12,
+    borderWidth: 1,
+    borderColor: "#ddd",
+    backgroundColor: "#e9e9e9",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  avatarPlaceholderText: {
+    fontSize: 18,
+    fontWeight: "700",
+    color: "#555",
   },
   card: {
     padding: 16,

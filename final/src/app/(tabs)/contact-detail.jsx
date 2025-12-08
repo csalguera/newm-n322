@@ -193,11 +193,17 @@ export default function ContactDetail() {
       <Text style={styles.title}>Edit Contact</Text>
 
       <View style={styles.form}>
-        {imageUri && (
-          <View style={styles.imagePreview}>
+        <View style={styles.imagePreview}>
+          {imageUri ? (
             <Image source={{ uri: imageUri }} style={styles.image} />
-          </View>
-        )}
+          ) : (
+            <View style={styles.imagePlaceholder}>
+              <Text style={styles.imagePlaceholderText}>
+                {(contactName || "").trim().charAt(0).toUpperCase() || "?"}
+              </Text>
+            </View>
+          )}
+        </View>
 
         <TouchableOpacity style={styles.photoButton} onPress={pickImage}>
           <Text style={styles.photoButtonText}>
@@ -271,6 +277,21 @@ const styles = StyleSheet.create({
     borderRadius: 60,
     borderWidth: 2,
     borderColor: "#06c",
+  },
+  imagePlaceholder: {
+    width: 120,
+    height: 120,
+    borderRadius: 60,
+    borderWidth: 2,
+    borderColor: "#ddd",
+    backgroundColor: "#e9e9e9",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  imagePlaceholderText: {
+    fontSize: 36,
+    fontWeight: "700",
+    color: "#555",
   },
   photoButton: {
     backgroundColor: "#f0f0f0",
