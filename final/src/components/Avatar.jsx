@@ -1,5 +1,5 @@
 import { Image, Text, View } from "react-native";
-import { colors } from "../styles/theme";
+import { colors, borderRadius } from "../styles/theme";
 
 // Reusable avatar with optional image and initial fallback
 export default function Avatar({

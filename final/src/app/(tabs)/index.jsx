@@ -6,7 +6,7 @@ import {
   TouchableOpacity,
   StyleSheet,
   Keyboard,
-  Pressable,
+  TouchableWithoutFeedback,
   Alert,
   Platform,
 } from "react-native";
@@ -29,7 +29,7 @@ import ContactListItem from "../../components/ContactListItem";
 import { colors, spacing, borderRadius, typography } from "../../styles/theme";
 import { formatPhoneNumber, isValidPhoneNumber } from "../../utils/phoneUtils";
 import { getContactDisplayName } from "../../utils/contactUtils";
-import { showAlert } from "../../utils/alertUtils";
+import { showAlert, showConfirm } from "../../utils/alertUtils";
 import { uploadContactImage } from "../../utils/storageUtils";
 
 export default function ContactsScreen() {
@@ -206,7 +206,7 @@ export default function ContactsScreen() {
   };
 
   return (
-    <Pressable onPress={Keyboard.dismiss} accessible={false}>
+    <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
       <View style={styles.container}>
         <View style={styles.header}>
           <Text style={styles.title}>Your Contacts</Text>
@@ -263,7 +263,7 @@ export default function ContactsScreen() {
           scrollEnabled={false}
         />
       </View>
-    </Pressable>
+    </TouchableWithoutFeedback>
   );
 }
 
