@@ -29,7 +29,7 @@ import ContactListItem from "../../components/ContactListItem";
 import { colors, spacing, borderRadius, typography } from "../../styles/theme";
 import { formatPhoneNumber, isValidPhoneNumber } from "../../utils/phoneUtils";
 import { getContactDisplayName } from "../../utils/contactUtils";
-import { showAlert, showConfirm } from "../../utils/alertUtils";
+import { showAlert } from "../../utils/alertUtils";
 import { uploadContactImage } from "../../utils/storageUtils";
 
 export default function ContactsScreen() {

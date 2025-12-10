@@ -1,6 +1,6 @@
 import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
 import Avatar from "./Avatar";
-import { colors, spacing, borderRadius, typography } from "../styles/theme";
+import { colors, spacing, typography } from "../styles/theme";
 
 export default function ContactListItem({ name, number, imageUri, onPress }) {
   return (
