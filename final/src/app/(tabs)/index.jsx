@@ -42,6 +42,7 @@ export default function ContactsScreen() {
   const [imageUri, setImageUri] = useState(null);
   const [contacts, setContacts] = useState([]);
   const [showForm, setShowForm] = useState(false);
+  const isWeb = Platform.OS === "web";
 
   useEffect(() => {
     if (!user) return;
@@ -205,64 +206,66 @@ export default function ContactsScreen() {
     setImageUri(null);
   };
 
-  return (
-    <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
-      <View style={styles.container}>
-        <View style={styles.header}>
-          <Text style={styles.title}>Your Contacts</Text>
-          <Text style={styles.subtitle}>{contacts.length} contacts</Text>
-        </View>
+  const content = (
+    <View style={styles.container}>
+      <View style={styles.header}>
+        <Text style={styles.title}>Your Contacts</Text>
+        <Text style={styles.subtitle}>{contacts.length} contacts</Text>
+      </View>
 
-        <TouchableOpacity
-          style={[styles.createButton, showForm && styles.createButtonActive]}
-          onPress={() => setShowForm((prev) => !prev)}
-        >
-          <Text style={styles.createButtonText}>
-            {showForm ? "Hide Form" : "+ Create Contact"}
-          </Text>
-        </TouchableOpacity>
+      <TouchableOpacity
+        style={[styles.createButton, showForm && styles.createButtonActive]}
+        onPress={() => setShowForm((prev) => !prev)}
+      >
+        <Text style={styles.createButtonText}>
+          {showForm ? "Hide Form" : "+ Create Contact"}
+        </Text>
+      </TouchableOpacity>
 
-        {showForm && (
-          <ContactForm
-            firstName={firstName}
-            lastName={lastName}
-            contactNumber={contactNumber}
-            imageUri={imageUri}
-            onFirstNameChange={setFirstName}
-            onLastNameChange={setLastName}
-            onNumberChange={(text) => setContactNumber(formatPhoneNumber(text))}
-            onPickImage={pickImage}
-            onRemoveImage={() => setImageUri(null)}
-            onSubmit={addContact}
-            submitLabel="Add Contact"
+      {showForm && (
+        <ContactForm
+          firstName={firstName}
+          lastName={lastName}
+          contactNumber={contactNumber}
+          imageUri={imageUri}
+          onFirstNameChange={setFirstName}
+          onLastNameChange={setLastName}
+          onNumberChange={(text) => setContactNumber(formatPhoneNumber(text))}
+          onPickImage={pickImage}
+          onRemoveImage={() => setImageUri(null)}
+          onSubmit={addContact}
+          submitLabel="Add Contact"
+        />
+      )}
+
+      <FlatList
+        style={styles.list}
+        data={contacts}
+        keyExtractor={(contact) => contact.id}
+        renderItem={({ item }) => (
+          <ContactListItem
+            name={getContactDisplayName(item)}
+            number={formatPhoneNumber(item.number || "")}
+            imageUri={item.imageUri}
+            onPress={() => router.push(`/(tabs)/contact-detail?id=${item.id}`)}
           />
         )}
+        ListEmptyComponent={
+          <View style={styles.emptyState}>
+            <Text style={styles.emptyTitle}>No contacts yet</Text>
+            <Text style={styles.emptySubtitle}>Create one to get started</Text>
+          </View>
+        }
+        scrollEnabled={false}
+      />
+    </View>
+  );
 
-        <FlatList
-          style={styles.list}
-          data={contacts}
-          keyExtractor={(contact) => contact.id}
-          renderItem={({ item }) => (
-            <ContactListItem
-              name={getContactDisplayName(item)}
-              number={formatPhoneNumber(item.number || "")}
-              imageUri={item.imageUri}
-              onPress={() =>
-                router.push(`/(tabs)/contact-detail?id=${item.id}`)
-              }
-            />
-          )}
-          ListEmptyComponent={
-            <View style={styles.emptyState}>
-              <Text style={styles.emptyTitle}>No contacts yet</Text>
-              <Text style={styles.emptySubtitle}>
-                Create one to get started
-              </Text>
-            </View>
-          }
-          scrollEnabled={false}
-        />
-      </View>
+  if (isWeb) return content;
+
+  return (
+    <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
+      {content}
     </TouchableWithoutFeedback>
   );
 }
