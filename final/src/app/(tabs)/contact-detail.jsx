@@ -34,6 +34,7 @@ export default function ContactDetail() {
   const [contactNumber, setContactNumber] = useState("");
   const [imageUri, setImageUri] = useState(null);
   const [loading, setLoading] = useState(true);
+  const isWeb = Platform.OS === "web";
 
   useEffect(() => {
     if (!user || !id) return;
@@ -264,30 +265,36 @@ export default function ContactDetail() {
     );
   }
 
+  const content = (
+    <ScrollView
+      style={styles.scroll}
+      contentContainerStyle={styles.container}
+      keyboardShouldPersistTaps="handled"
+    >
+      <Text style={styles.title}>Edit Contact</Text>
+
+      <ContactDetailForm
+        firstName={firstName}
+        lastName={lastName}
+        contactNumber={contactNumber}
+        imageUri={imageUri}
+        onFirstNameChange={setFirstName}
+        onLastNameChange={setLastName}
+        onNumberChange={(text) => setContactNumber(formatPhoneNumber(text))}
+        onPickImage={pickImage}
+        onRemoveImage={() => setImageUri(null)}
+        onSave={saveChanges}
+        onDelete={deleteContact}
+        onCancel={() => router.back()}
+      />
+    </ScrollView>
+  );
+
+  if (isWeb) return content;
+
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
-      <ScrollView
-        style={styles.scroll}
-        contentContainerStyle={styles.container}
-        keyboardShouldPersistTaps="handled"
-      >
-        <Text style={styles.title}>Edit Contact</Text>
-
-        <ContactDetailForm
-          firstName={firstName}
-          lastName={lastName}
-          contactNumber={contactNumber}
-          imageUri={imageUri}
-          onFirstNameChange={setFirstName}
-          onLastNameChange={setLastName}
-          onNumberChange={(text) => setContactNumber(formatPhoneNumber(text))}
-          onPickImage={pickImage}
-          onRemoveImage={() => setImageUri(null)}
-          onSave={saveChanges}
-          onDelete={deleteContact}
-          onCancel={() => router.back()}
-        />
-      </ScrollView>
+      {content}
     </TouchableWithoutFeedback>
   );
 }
