@@ -8,6 +8,7 @@ import {
   Keyboard,
   TouchableWithoutFeedback,
   Alert,
+  Platform,
 } from "react-native";
 import { useRouter } from "expo-router";
 import { useActionSheet } from "@expo/react-native-action-sheet";
@@ -29,6 +30,7 @@ import { colors, spacing, borderRadius, typography } from "../../styles/theme";
 import { formatPhoneNumber, isValidPhoneNumber } from "../../utils/phoneUtils";
 import { getContactDisplayName } from "../../utils/contactUtils";
 import { showAlert, showConfirm } from "../../utils/alertUtils";
+import { uploadContactImage } from "../../utils/storageUtils";
 
 export default function ContactsScreen() {
   const router = useRouter();
@@ -71,9 +73,15 @@ export default function ContactsScreen() {
       allowsEditing: true,
       aspect: [1, 1],
       quality: 0.5,
+      base64: true,
     });
     if (!result.canceled) {
-      setImageUri(result.assets[0].uri);
+      const asset = result.assets[0];
+      const uri =
+        Platform.OS === "web" && asset.base64
+          ? `data:${asset.mimeType || "image/jpeg"};base64,${asset.base64}`
+          : asset.uri;
+      setImageUri(uri);
     }
   };
 
@@ -88,9 +96,15 @@ export default function ContactsScreen() {
       allowsEditing: true,
       aspect: [1, 1],
       quality: 0.5,
+      base64: true,
     });
     if (!result.canceled) {
-      setImageUri(result.assets[0].uri);
+      const asset = result.assets[0];
+      const uri =
+        Platform.OS === "web" && asset.base64
+          ? `data:${asset.mimeType || "image/jpeg"};base64,${asset.base64}`
+          : asset.uri;
+      setImageUri(uri);
     }
   };
 
@@ -160,12 +174,27 @@ export default function ContactsScreen() {
     const formattedNumber = formatPhoneNumber(contactNumber);
     const fullName = `${first} ${last}`.trim();
 
+    let uploadedImageUri = null;
+    try {
+      if (imageUri) {
+        uploadedImageUri = await uploadContactImage(imageUri, user.uid);
+      }
+    } catch (error) {
+      console.error("Error uploading image:", error);
+      showAlert({
+        title: "Image upload failed",
+        message: "Could not upload the photo. Please try again.",
+        type: "error",
+      });
+      return;
+    }
+
     await addDoc(collection(db, "contacts"), {
       firstName: first,
       lastName: last,
       name: fullName, // backward compatible display field
       number: formattedNumber,
-      imageUri: imageUri || null,
+      imageUri: uploadedImageUri || null,
       ownerId: user.uid,
       createdAt: serverTimestamp(),
     });
