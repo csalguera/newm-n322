@@ -6,7 +6,7 @@ import {
   TouchableOpacity,
   StyleSheet,
   Keyboard,
-  TouchableWithoutFeedback,
+  Pressable,
   Alert,
   Platform,
 } from "react-native";
@@ -206,7 +206,7 @@ export default function ContactsScreen() {
   };
 
   return (
-    <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
+    <Pressable onPress={Keyboard.dismiss} accessible={false}>
       <View style={styles.container}>
         <View style={styles.header}>
           <Text style={styles.title}>Your Contacts</Text>
@@ -263,7 +263,7 @@ export default function ContactsScreen() {
           scrollEnabled={false}
         />
       </View>
-    </TouchableWithoutFeedback>
+    </Pressable>
   );
 }
 

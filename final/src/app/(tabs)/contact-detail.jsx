@@ -7,7 +7,7 @@ import {
   TouchableOpacity,
   ScrollView,
   Keyboard,
-  TouchableWithoutFeedback,
+  Pressable,
   Alert,
   Platform,
 } from "react-native";
@@ -265,7 +265,7 @@ export default function ContactDetail() {
   }
 
   return (
-    <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
+    <Pressable onPress={Keyboard.dismiss} accessible={false}>
       <ScrollView
         style={styles.scroll}
         contentContainerStyle={styles.container}
@@ -288,7 +288,7 @@ export default function ContactDetail() {
           onCancel={() => router.back()}
         />
       </ScrollView>
-    </TouchableWithoutFeedback>
+    </Pressable>
   );
 }
 
